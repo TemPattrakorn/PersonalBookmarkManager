@@ -9,6 +9,19 @@ rules only.
   newer. Do not introduce Next.js or competing router/UI frameworks.
 - Use Auth0 Authorization Code flow with PKCE using S256. Never use implicit
   flow, expose secrets in the client, or log tokens.
+- Use the provided public SPA configuration:
+  - discovery: `https://dev-yg.us.auth0.com/.well-known/openid-configuration`;
+  - client ID: `H9F6QG5SzTKMv0tbmgxLj9LjG1EKVllA`;
+  - callback URL: `http://localhost:3000/callback`;
+  - logout URL: `http://localhost:3000`;
+  - scope: `openid profile email`;
+  - API audience: `https://bbl-candidate-test-api`.
+- Run the frontend on port 3000 locally so the registered callback and logout
+  URLs match. These Auth0 values are public and may be committed directly.
+- The supplied test login is `candidate@test.com`. Keep its real password out
+  of tracked files and client bundles; use an ignored local or test-runner
+  secret, never a `VITE_` variable. Commit only placeholder `.env.example`
+  values and ensure real `.env` files are ignored.
 - Follow `API_DESIGN.md` rather than guessing payloads, errors, filters, or
   authorization behavior.
 - Keep the core UI to `/collections` and `/bookmarks` with the approved list,

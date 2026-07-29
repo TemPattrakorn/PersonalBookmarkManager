@@ -86,17 +86,35 @@ without explicit approval. Propose the exact documentation impact with the
 code plan or handoff. Once approved, update the affected document in the same
 logical change as the behavior it describes.
 
-- `DECISIONS.md` records accepted choices and rationale, not unapproved ideas.
-- `API_DESIGN.md` records the implemented contract and privacy enforcement.
-- `AI_WORKFLOW.md` records factual agent roles, review, corrections, and
-  verification; never claim human review or checks that did not occur.
-- `README.md` records how to run the project and what is complete or skipped.
+- Preserve the required submission layout: `backend/`, `frontend/`, `.agent/`,
+  `AGENTS.md`, `API_DESIGN.md`, `DECISIONS.md`,
+  `AI_WORKFLOW.md`, and `README.md`.
+- `.agent/` must contain at least one reusable capability that was genuinely
+  used, such as a command, subagent, prompt template, hook, CI gate, or MCP
+  integration. Include its definition and document when and why it was used.
+- `API_DESIGN.md` must cover resources, verbs, status codes, list/filter
+  parameters, error shape, the collection-bookmark relationship and on-delete
+  behavior, and where privacy is enforced. Record 2–3 incorrect agent attempts
+  and how review found and corrected them.
+- `DECISIONS.md` contains short ADR-style entries for accepted choices,
+  alternatives and tradeoffs, and how the agent was steered away from its
+  default. Do not record unapproved ideas as decisions.
+- `AI_WORKFLOW.md` is a factual 1–2 page account of tools/models, task
+  decomposition, 2–3 successes, 2–3 failures and recoveries, one effective
+  and one ineffective prompt, and cost/token awareness. Never claim review or
+  checks that did not occur.
+- `README.md` contains setup and run steps, test commands, and what was
+  completed or skipped with reasons.
+- Automated tests are submission evidence: every behavioral or security claim
+  must be reproducible by a reviewer, and untested areas must be stated.
 
 ## Do not
 
 - Do not edit before plan approval or exceed the approved scope.
 - Do not stage, commit, push, create branches, or open pull requests unless
-  explicitly requested.
+  explicitly requested. When requested, make meaningful chronological commits
+  that expose scaffolding, features, review fixes, and corrections; never
+  squash them before submission.
 - Do not weaken tenant isolation for convenience or reveal whether another
   user's resource exists.
 - Do not add public content, a shared feed, or browsing across users.
