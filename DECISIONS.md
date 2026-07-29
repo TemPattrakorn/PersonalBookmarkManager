@@ -25,3 +25,26 @@ scope, that cost is not justified.
 SPA-direct plan from the initially considered BFF design. The user chose the
 original SPA-direct plan; do not introduce BFF/session infrastructure unless a
 later approved decision replaces this one.
+
+## 2026-07-29 — Preserve bookmarks when deleting a collection
+
+**Status:** Accepted
+
+**Decision:** Deleting an authenticated person's collection deletes only that
+collection. Its bookmarks remain owned by that person and become
+uncategorized (`collectionId = null`). The delete and unlink must be atomic.
+
+**Context:** A collection has a nullable bookmark relationship. The product
+needs a defined outcome when an owner deletes a collection that contains
+bookmarks, without weakening private ownership.
+
+**Alternatives and tradeoffs:** Blocking deletion until the collection is
+empty avoids changing bookmarks but adds a manual cleanup step. Cascading the
+deletion removes associated bookmarks but risks unintended data loss. Keeping
+the bookmarks while clearing their collection reference preserves user data
+with the smallest behavior change.
+
+**Agent direction:** The agent presented blocking deletion, cascade deletion,
+and unlinking as explicit alternatives rather than choosing a database default.
+The user selected unlinking; do not add deletion counts, sharing behavior, or
+bookmark deletion as part of collection deletion.
