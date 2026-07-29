@@ -1,0 +1,1 @@
+# Agent rule for PersonalBookmarkManager
