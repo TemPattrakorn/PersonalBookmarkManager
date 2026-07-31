@@ -54,10 +54,25 @@ collection. An unfiltered `GET /bookmarks` remains owner-only; a collection
 filter may return shared bookmarks only when the authenticated person has an
 active grant for that exact collection.
 
-All collection and bookmark create, update, patch, and delete operations
+All collection and bookmark create, `PATCH`, and delete operations
 remain owner-only. A grantee attempting any mutation receives the same generic
 `404 Not Found` response as for a nonexistent resource. Uncategorized
 bookmarks are always owner-only.
+
+## Update semantics
+
+`PATCH` is the only update verb; there are no `PUT` endpoints. `PATCH
+/collections/:id` accepts a partial collection body, and `PATCH /bookmarks/:id`
+accepts a partial bookmark body. Omitted editable fields keep their current
+values. Every supplied field is validated; an empty body, an unknown or
+read-only field, or a malformed value returns `400 Bad Request`.
+
+`bookmark.collectionId` may be explicitly `null` to make the bookmark
+uncategorized. A non-null collection ID must identify a collection owned by
+the authenticated person; an unavailable or other person's collection returns
+the generic `404 Not Found`. A successful patch returns `200 OK` with the
+updated resource. A bookmark or collection not owned by the caller, including
+one owned by another person, also returns that same generic `404 Not Found`.
 
 ## Collection shares
 

@@ -106,3 +106,24 @@ grantee-controlled leave action because it satisfies the under-specified
 requirement with less implementation effort and less testing than the other
 options. Do not add acceptance, decline history, blocking, or notification
 state without another approved decision.
+
+## 2026-07-31 — Use partial PATCH updates only
+
+**Decision:** Collections and bookmarks use owner-only `PATCH` endpoints for
+updates. A request changes only its supplied editable fields; omitted fields
+remain unchanged. `PUT` endpoints are not provided. A bookmark may be made
+uncategorized only by explicitly supplying `collectionId: null`.
+
+**Context:** The API needed an explicit update contract before implementation.
+Partial edits are the natural fit for the UI and avoid forcing clients to send
+unchanged data that could overwrite a newer value.
+
+**Alternatives and tradeoffs:** Full-replacement `PUT` makes missing-field
+behavior depend on the client and risks accidental data loss. Supporting both
+verbs creates two update contracts without a current use for either
+difference. `PATCH` needs clear rules for omitted fields and explicit nulls,
+which the API design records.
+
+**User opinion and agent direction:** The agent recommended `PATCH` only; the
+user approved it. Do not add `PUT`, JSON Patch operations, or a generic
+clear-on-null rule without another approved decision.
