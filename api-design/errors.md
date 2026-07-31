@@ -56,12 +56,13 @@ framework's normalized generic `404` response; the API adds no custom `405`
 behavior.
 
 Structurally invalid input is rejected before lookup with `400`. This includes
-an invalid ID format, a negative pagination value, or an unknown query
-parameter. Once an identifier or lookup value is structurally valid, failure
-of the authorization-scoped lookup uses `404`. A missing resource, another
-owner's resource, a grantee mutation attempt, an inaccessible collection
-filter, a revoked or absent share, and a share-recipient lookup with zero,
-multiple, or unverified eligible matches all return exactly:
+an invalid UUID, a pagination value outside the approved integer bounds, a
+repeated or malformed query value, or an unknown query parameter. Once an
+identifier or lookup value is structurally valid, failure of the
+authorization-scoped lookup uses `404`. A missing resource, another owner's
+resource, a grantee mutation attempt, an inaccessible collection filter, a
+revoked or absent share, and a share-recipient lookup with zero, multiple, or
+unverified eligible matches all return exactly:
 
 ```json
 {

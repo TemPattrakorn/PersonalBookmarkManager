@@ -127,3 +127,55 @@ which the API design records.
 **User opinion and agent direction:** The agent recommended `PATCH` only; the
 user approved it. Do not add `PUT`, JSON Patch operations, or a generic
 clear-on-null rule without another approved decision.
+
+## 2026-07-31 — Use SQLite with UUID resource identifiers
+
+**Decision:** The application will use SQLite through Prisma. Every persisted
+resource uses a UUID primary key. Auth0 subject is unique; normalized email is
+deliberately not unique so ambiguous recipient matches can be rejected without
+linking accounts. A collection-grantee share pair is unique. Foreign keys and
+indexes cover ownership, collection membership, and grantee lookups.
+
+The initial schema uses only the person, collection, bookmark, and collection
+share fields listed in `backend/AGENTS.md`. There is no person deletion API.
+Collection deletion remains the explicit atomic operation already approved:
+unlink its owner's bookmarks, delete its shares, and delete the collection.
+
+**Alternatives and tradeoffs:** PostgreSQL offers closer production parity but
+adds a service and configuration burden that this take-home does not need.
+Integer IDs are shorter but expose creation order; CUIDs would also work but
+provide no useful advantage over standard UUIDs here.
+
+**User opinion and agent direction:** The user approved SQLite and UUIDs as
+the smallest SQL-backed implementation. Do not add another database, public
+IDs, soft deletion, or speculative schema fields without a new decision.
+
+## 2026-07-31 — Use a minimal bounded CRUD contract
+
+**Decision:** List endpoints return plain arrays without counts. They accept
+`limit` and `offset`, defaulting to `50` and `0`; `limit` may not exceed `100`.
+Results are ordered by `createdAt` descending and then UUID descending. The
+only collection filter is `scope=owned|shared`, and the only bookmark filter
+is an exact `collectionId`. Unknown filters are invalid.
+
+Collection names are trimmed non-empty strings of at most 100 characters.
+Bookmark titles are trimmed non-empty strings of at most 200 characters.
+Bookmark URLs are trimmed, otherwise preserved, limited to 2,048 characters,
+and must use HTTP or HTTPS. Notes are nullable and limited to 5,000 characters;
+omission on create stores `null`, and explicit `null` on patch clears them.
+An omitted or `null` bookmark collection on create makes it uncategorized.
+
+Create operations return `201`, reads and patches return `200`, and deletes
+return `204` without a body. Collection and bookmark responses include their
+UUID, editable fields, timestamps, and `access`, but never an owner or person
+identifier. `GET /me` returns only the authenticated person's verified email.
+
+**Alternatives and tradeoffs:** Cursor pagination scales better during heavy
+concurrent writes but adds cursor and response metadata with no current need.
+Response envelopes and total counts add client structure and create another
+privacy-sensitive value. Full-text search, additional filters, and preserving
+blank note values expand behavior without supporting the approved core UI.
+
+**User opinion and agent direction:** The user approved these exact defaults.
+Do not add counts, cursor pagination, search, new filters, or wider response
+fields without a new approved decision.

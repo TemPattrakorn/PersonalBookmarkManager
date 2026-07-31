@@ -40,10 +40,13 @@ search, suggestions, names, invitation, notification, or shareable output.
 
 `GET /collections/:id/shares`
 
-The owner receives `200 OK` and a list of that collection's current grants in
-the response shape above. This list is the only recipient-browsing surface and
-contains exact granted emails but no names or unrelated accounts. A grantee,
-outsider, or unavailable collection receives the generic `404 Not Found`.
+The owner receives `200 OK` and a paginated plain array of that collection's
+current grants in the response shape above. It accepts only `limit` and
+`offset`, using the defaults, limits, validation, and ordering defined in the
+[core pagination contract](core.md#pagination-and-ordering). This list is the
+only recipient-browsing surface and contains exact granted emails but no
+names, counts, or unrelated accounts. A grantee, outsider, or unavailable
+collection receives the generic `404 Not Found`.
 
 ## Revoke a grant
 
