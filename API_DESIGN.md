@@ -17,7 +17,7 @@ Only a verified email matching exactly one previously signed-in local person
 is eligible for sharing. Zero, multiple, or unverified matches all use the
 same generic `404 Not Found` behavior.
 
-Reference: https://auth0.com/docs/api/authentication/user-profile/get-user-info
+Reference: <https://auth0.com/docs/api/authentication/user-profile/get-user-info/>
 
 ## Resources
 
