@@ -2,8 +2,6 @@
 
 ## 2026-07-29 — Use SPA-direct Auth0 authentication
 
-**Status:** Accepted
-
 **Decision:** The React SPA will use Auth0's Authorization Code flow with
 PKCE (`S256`). It will send the resulting access token to the NestJS API as a
 Bearer token. NestJS must verify the token and derive the authenticated person
@@ -28,8 +26,6 @@ later approved decision replaces this one.
 
 ## 2026-07-29 — Preserve bookmarks when deleting a collection
 
-**Status:** Accepted
-
 **Decision:** Deleting an authenticated person's collection deletes only that
 collection. Its bookmarks remain owned by that person and become
 uncategorized (`collectionId = null`). The delete and unlink must be atomic.
@@ -50,8 +46,6 @@ The user selected unlinking; do not add deletion counts, sharing behavior, or
 bookmark deletion as part of collection deletion.
 
 ## 2026-07-30 — Use email-addressed read-only collection sharing
-
-**Status:** Accepted
 
 **Decision:** A collection owner may grant live read access to exactly one
 previously signed-in local person by entering that person's verified email.
@@ -83,3 +77,32 @@ to previously signed-in local people uses the existing SPA-direct setup.
 under the repository invariant. The user narrowed the exception to automatic,
 exact-email, read-only live sharing and rejected browsable recipients and
 copyable output. Do not expand this model without another approved decision.
+
+## 2026-07-31 — Let a grantee leave an automatically shared collection
+
+**Decision:** A grantee may leave a shared collection by deleting only their
+own `CollectionShare`. Leaving never deletes or changes the collection, its
+bookmarks, or another person's share. The action is idempotent and returns no
+information about whether a matching collection or share exists. The owner may
+grant access to the same person again later.
+
+Owner deletion and grantee departure are deliberately separate operations.
+The owner deletes the collection with `DELETE /collections/:id`; a grantee
+leaves with `DELETE /collections/:id/share`. The UI must label these actions
+"Delete collection" and "Leave shared collection" respectively.
+
+**Context:** Automatic sharing already gives the recipient immediate read
+access. The grantee still needs a simple way to remove unwanted shared content
+without an invitation workflow or any effect on owner data.
+
+**Alternatives and tradeoffs:** Accept/decline would add pending state,
+transitions, invitation UI, race cases, and more tests. Retaining declined or
+blocked states would prevent repeated sharing but adds policy and storage that
+the current requirement does not need. A local hide action would leave server
+authorization active and make "leave" misleading.
+
+**User opinion and agent direction:** The user chose immediate sharing with a
+grantee-controlled leave action because it satisfies the under-specified
+requirement with less implementation effort and less testing than the other
+options. Do not add acceptance, decline history, blocking, or notification
+state without another approved decision.

@@ -8,8 +8,9 @@ directory-specific rules; it does not replace this file unless it says so.
 Everything is private to the authenticated person who created it by default.
 The only approved cross-user exception is an explicit `CollectionShare`,
 which lets its named grantee read that collection and its current bookmarks.
-Only the owner may change or delete collections or bookmarks, manage shares,
-or access uncategorized bookmarks.
+Only the owner may change or delete collections or bookmarks, manage another
+person's share, or access uncategorized bookmarks. A grantee may delete only
+their own `CollectionShare` to leave a shared collection.
 
 Treat any disclosure outside an active share, including IDs, counts, filter
 results, owner profile data, error differences, and nested-resource behavior,
@@ -77,7 +78,8 @@ If project documents conflict, stop and ask; do not choose a winner.
   person/owner ID from request data as authority.
 - Enforce owner-or-grantee access server-side for approved shared reads and
   ownership for every other get, list, filter, nested lookup, create, update,
-  patch, and delete operation.
+  patch, and delete operation, except that a grantee may delete only their own
+  share through the approved leave route.
 - Never rely on the frontend to enforce privacy.
 - Never commit or log access tokens, credentials, Auth0 secrets, or sensitive
   personal data.

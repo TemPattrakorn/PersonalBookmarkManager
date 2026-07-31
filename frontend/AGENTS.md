@@ -28,9 +28,9 @@ rules only.
   before adding the approved collection-sharing UI.
 - The approved sharing UI is limited to an exact-email grant form, the owner's
   current grantee email list with revoke controls, and a read-only "Shared by
-  others" collection section. Do not add user search, names, shareable links,
-  copies, pending invitations, notifications, roles, `/all`, or full-text
-  search.
+  others" collection section with a grantee-only "Leave shared collection"
+  action. Do not add user search, names, shareable links, copies, pending
+  invitations, notifications, roles, `/all`, or full-text search.
 
 ## Privacy and behavior
 
@@ -38,6 +38,9 @@ rules only.
   hidden controls are user experience, not security boundaries.
 - Render shared collections and bookmarks read-only from the API's `access`
   marker and expose no owner profile data.
+- Show "Delete collection" only for owners and "Leave shared collection" only
+  for viewers. Confirm that leaving removes access without deleting the
+  owner's collection or bookmarks.
 - Never send a person/owner ID to establish ownership.
 - Do not expose tokens, private API data, or diagnostic details through URLs,
   browser logs, or user-facing errors.

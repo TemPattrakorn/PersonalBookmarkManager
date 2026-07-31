@@ -15,9 +15,9 @@ rules only.
 - The discovery URL and audience are public configuration. Do not add or
   require a client secret for the public SPA.
 - Implement `/me`, `/collections`, `/bookmarks`,
-  `/collections/:id/bookmarks`, and `/collections/:id/shares` only as
-  approved. Each resource must support only the verbs and filtering operations
-  recorded in `API_DESIGN.md`.
+  `/collections/:id/bookmarks`, `/collections/:id/shares`, and the singular
+  `/collections/:id/share` leave route only as approved. Each resource must
+  support only the verbs and filtering operations recorded in `API_DESIGN.md`.
 
 ## Tenant isolation
 
@@ -29,7 +29,8 @@ rules only.
   ID-only lookup followed by an authorization check is not the default.
 - Apply the same owner-or-grantee read rule to direct, filtered, relation, and
   nested reads. Keep all updates, patches, deletes, and share management
-  owner-only.
+  owner-only except for the authenticated grantee deleting their own share
+  through the leave route.
 - When assigning a bookmark to a collection, verify that the collection
   belongs to the same current person. `null` means uncategorized.
 - Resolve a share recipient only from a normalized, verified email belonging
@@ -59,6 +60,8 @@ rules only.
 - For every affected operation, test the allowed owner path, any approved
   grantee read, and denial of outsider and grantee writes across direct,
   filtered, and nested access.
+- Test that leaving deletes only the authenticated grantee's share and cannot
+  change the collection, its bookmarks, or another grantee's share.
 - Run focused backend tests, then the applicable full test, lint, typecheck,
   and build commands before handoff.
 

@@ -61,7 +61,9 @@ bookmarks are always owner-only.
 
 ## Collection shares
 
-All share-management routes are owner-only.
+Creating, listing, and revoking another person's share are owner-only. The one
+grantee-managed operation is deleting the authenticated person's own share
+through the singular leave route.
 
 ### Create or repeat a grant
 
@@ -111,6 +113,25 @@ immediately; subsequent shared list, direct, filtered, and nested reads return
 the same results as if the grant had never existed. An unavailable collection
 or grant returns the generic `404 Not Found`.
 
+### Leave a shared collection
+
+`DELETE /collections/:id/share`
+
+The API deletes a `CollectionShare` only when its `collectionId` matches `:id`
+and its `granteePersonId` is the authenticated person. The request contains no
+grantee or share ID and can never delete another person's grant.
+
+The endpoint is idempotent and always returns `204 No Content`, including when
+the collection is owned by the caller, belongs to an outsider, does not exist,
+or no matching share remains. This response prevents the leave operation from
+revealing collection or grant existence.
+
+After a successful leave, the collection no longer appears in
+`GET /collections?scope=shared`, and subsequent direct, filtered, relation,
+and nested reads use the generic `404 Not Found`. The collection, its
+bookmarks, and every other grant remain unchanged. The owner may grant the
+same person access again later; leaving creates no block or history record.
+
 ## Delete a collection
 
 `DELETE /collections/:id` requires a verified Auth0 access token. The API
@@ -131,10 +152,11 @@ response. This prevents callers from inferring another person's collection.
 
 Owner-or-grantee read authorization is applied in the database query shared by
 direct, filtered, relation, and nested reads. Owner-only authorization is
-applied in every write and share-management query. IDs, counts, filters,
-relations, nested routes, and error differences must not expose unshared
-resources. The exact JSON error envelope will be defined with the global error
-contract; every `404` in this document uses that one generic shape.
+applied in every write and share-management query except the grantee's
+idempotent self-removal query. IDs, counts, filters, relations, nested routes,
+and error differences must not expose unshared resources. The exact JSON error
+envelope will be defined with the global error contract; every `404` in this
+document uses that one generic shape.
 
 ## Sharing acceptance scenarios
 
@@ -148,6 +170,11 @@ Future automated tests must cover:
 - denial of every grantee mutation and share-management operation;
 - outsider non-disclosure across direct, list, filter, count, and nested paths;
 - revocation removing all subsequent read access;
+- leaving removing only the authenticated grantee's share while preserving the
+  collection, bookmarks, and other grants;
+- repeated leave, owner leave, outsider leave, and missing-ID leave all
+  returning `204` without changing owner data;
+- the owner granting access to the same person again after they leave;
 - an email change leaving an existing stable-person grant intact; and
 - collection deletion revoking shares while preserving bookmarks as private,
   uncategorized owner data.
