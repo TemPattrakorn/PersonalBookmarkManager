@@ -5,12 +5,15 @@ directory-specific rules; it does not replace this file unless it says so.
 
 ## Non-negotiable security invariant
 
-Everything is private to the authenticated person who created it. A person
-must never be able to read, change, delete, enumerate, or infer the existence
-of another person's collections or bookmarks.
+Everything is private to the authenticated person who created it by default.
+The only approved cross-user exception is an explicit `CollectionShare`,
+which lets its named grantee read that collection and its current bookmarks.
+Only the owner may change or delete collections or bookmarks, manage shares,
+or access uncategorized bookmarks.
 
-Treat any cross-user disclosure, including IDs, counts, filter results, error
-differences, and nested-resource behavior, as a security bug.
+Treat any disclosure outside an active share, including IDs, counts, filter
+results, owner profile data, error differences, and nested-resource behavior,
+as a security bug.
 
 ## Before changing anything
 
@@ -38,14 +41,15 @@ their tradeoffs, and a recommendation, then wait for the user's decision.
 This includes, but is not limited to:
 
 - collection deletion and its effect on bookmarks;
-- collection sharing and its authorization model;
+- changes to collection sharing and its authorization model;
 - `PUT` versus `PATCH` semantics;
 - filtering, pagination, validation, and error semantics;
 - schema changes, destructive data behavior, or compatibility breaks.
 
-Collection sharing is deferred. Do not add sharing tables, endpoints, UI, or
-exceptions to private ownership until an authorization model is explicitly
-approved and recorded in both `DECISIONS.md` and `API_DESIGN.md`.
+The only approved sharing model is the read-only, email-addressed collection
+grant recorded in `DECISIONS.md` and `API_DESIGN.md`. Do not add roles,
+shareable links, copies, pending invitations, notifications, public access,
+user browsing, or any other sharing behavior without a new approved decision.
 
 If project documents conflict, stop and ask; do not choose a winner.
 
@@ -71,13 +75,14 @@ If project documents conflict, stop and ask; do not choose a winner.
   and documents an explicit exception.
 - Derive identity only from the verified OIDC principal. Never accept a
   person/owner ID from request data as authority.
-- Enforce ownership server-side for every get, list, filter, nested lookup,
-  create, update, patch, and delete operation.
+- Enforce owner-or-grantee access server-side for approved shared reads and
+  ownership for every other get, list, filter, nested lookup, create, update,
+  patch, and delete operation.
 - Never rely on the frontend to enforce privacy.
 - Never commit or log access tokens, credentials, Auth0 secrets, or sensitive
   personal data.
-- Every changed data-access path needs a test proving one seeded user cannot
-  access or infer another seeded user's data.
+- Every changed data-access path needs tests for the owner, an active grantee
+  where applicable, and an outsider who cannot access or infer the data.
 
 ## Documentation and evidence
 
@@ -115,8 +120,8 @@ logical change as the behavior it describes.
   explicitly requested. When requested, make meaningful chronological commits
   that expose scaffolding, features, review fixes, and corrections; never
   squash them before submission.
-- Do not weaken tenant isolation for convenience or reveal whether another
-  user's resource exists.
+- Do not weaken tenant isolation beyond the approved read-only collection
+  grant or reveal whether another user's unshared resource exists.
 - Do not add public content, a shared feed, or browsing across users.
 - Do not implement optional bonuses until all core requirements pass their
   gates and the user explicitly approves the bonus.

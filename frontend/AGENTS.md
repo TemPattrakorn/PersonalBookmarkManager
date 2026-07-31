@@ -24,15 +24,20 @@ rules only.
   values and ensure real `.env` files are ignored.
 - Follow `API_DESIGN.md` rather than guessing payloads, errors, filters, or
   authorization behavior.
-- Keep the core UI to `/collections` and `/bookmarks` with the approved list,
-  detail, create, delete, and collection-filter interactions.
-- Do not build sharing UI, `/all`, or full-text search until explicitly
-  approved under the root scope rules.
+- Complete and verify the private core UI on `/collections` and `/bookmarks`
+  before adding the approved collection-sharing UI.
+- The approved sharing UI is limited to an exact-email grant form, the owner's
+  current grantee email list with revoke controls, and a read-only "Shared by
+  others" collection section. Do not add user search, names, shareable links,
+  copies, pending invitations, notifications, roles, `/all`, or full-text
+  search.
 
 ## Privacy and behavior
 
 - Treat backend authorization as authoritative; client-side route guards and
   hidden controls are user experience, not security boundaries.
+- Render shared collections and bookmarks read-only from the API's `access`
+  marker and expose no owner profile data.
 - Never send a person/owner ID to establish ownership.
 - Do not expose tokens, private API data, or diagnostic details through URLs,
   browser logs, or user-facing errors.

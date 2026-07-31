@@ -14,22 +14,28 @@ rules only.
   - required scopes requested by the client: `openid profile email`.
 - The discovery URL and audience are public configuration. Do not add or
   require a client secret for the public SPA.
-- Implement `/me`, `/collections`, `/bookmarks`, and
-  `/collections/:id/bookmarks` only as approved. Each resource must support
-  the required get-one, list, create, update, patch, delete, and filtering
-  operations.
+- Implement `/me`, `/collections`, `/bookmarks`,
+  `/collections/:id/bookmarks`, and `/collections/:id/shares` only as
+  approved. Each resource must support only the verbs and filtering operations
+  recorded in `API_DESIGN.md`.
 
 ## Tenant isolation
 
 - Obtain the current person from the verified token subject and resolve any
   local person record server-side.
 - Set ownership during creation from that identity; never from request data.
-- Scope Prisma reads and writes by both resource identity and current person.
-  An ID-only lookup followed by an authorization check is not the default.
-- Apply the same ownership scope to filters, counts, relations, nested routes,
-  updates, and deletes.
+- Scope Prisma writes by both resource identity and owner. Scope approved
+  shared reads by owner or active `CollectionShare` in the database query; an
+  ID-only lookup followed by an authorization check is not the default.
+- Apply the same owner-or-grantee read rule to direct, filtered, relation, and
+  nested reads. Keep all updates, patches, deletes, and share management
+  owner-only.
 - When assigning a bookmark to a collection, verify that the collection
   belongs to the same current person. `null` means uncategorized.
+- Resolve a share recipient only from a normalized, verified email belonging
+  to exactly one previously signed-in local person. Use Auth0 `/userinfo` to
+  establish that email and match its `sub` to the verified token principal;
+  never trust client-supplied profile data.
 - Keep cross-user response behavior consistent with the approved API contract
   so it cannot reveal whether a resource exists.
 
@@ -37,16 +43,22 @@ rules only.
 
 - Persist every route through Prisma; do not substitute in-memory state.
 - Start from the brief's suggested fields:
+  - person: `id`, unique Auth0 subject, email, normalized email, verification
+    state, `createdAt`, `updatedAt`;
   - collection: `id`, `name`, `ownerId`, `createdAt`, `updatedAt`;
   - bookmark: `id`, `url`, `title`, optional `notes`, nullable
     `collectionId`, `ownerId`, `createdAt`, `updatedAt`.
+  - collection share: `id`, `collectionId`, `granteePersonId`, `createdAt`,
+    unique on collection and grantee.
 - This data shape is guidance, not a settled schema. Any refinement requires
   rationale and approval in `DECISIONS.md`.
-- Do not choose cascade, restrict, or nullification behavior for collection
-  deletion until it is approved in `DECISIONS.md` and `API_DESIGN.md`.
-- Seed at least two distinct users with separate collections and bookmarks.
-- For every affected operation, test the allowed owner's path and denial of a
-  second user's direct, filtered, and nested access.
+- Preserve the approved collection deletion behavior: nullify its bookmark
+  references and delete its share rows atomically.
+- Seed at least three distinct users so owner, grantee, and outsider behavior
+  can be tested.
+- For every affected operation, test the allowed owner path, any approved
+  grantee read, and denial of outsider and grantee writes across direct,
+  filtered, and nested access.
 - Run focused backend tests, then the applicable full test, lint, typecheck,
   and build commands before handoff.
 

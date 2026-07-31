@@ -48,3 +48,38 @@ with the smallest behavior change.
 and unlinking as explicit alternatives rather than choosing a database default.
 The user selected unlinking; do not add deletion counts, sharing behavior, or
 bookmark deletion as part of collection deletion.
+
+## 2026-07-30 — Use email-addressed read-only collection sharing
+
+**Status:** Accepted
+
+**Decision:** A collection owner may grant live read access to exactly one
+previously signed-in local person by entering that person's verified email.
+The email is normalized only for lookup; the resulting `CollectionShare` is
+bound to the grantee's stable local person ID, so a later email change does not
+revoke access. A grantee may read the shared collection and the bookmarks
+currently in it, but may not change, delete, or reshare anything. The owner may
+list the exact emails already granted on that collection and revoke any grant.
+
+Sharing is automatic when the submitted email uniquely matches an eligible
+account. Repeating the same grant is idempotent. There is no user directory,
+name browsing, shareable link, copy, role, pending invitation, notification,
+or public access.
+
+**Context:** The requirement that a user may want to share a collection was
+interpreted as live visibility of that collection and its bookmarks. The
+recipient should see it in a separate "Shared by others" section while all
+other data remains private.
+
+**Alternatives and tradeoffs:** Keeping sharing deferred preserves the
+creator-only model but does not satisfy live sharing. Snapshot copies avoid
+ongoing authorization but do not stay synchronized. Capability links are easy
+to forward and are not identity-bound. Viewer/editor roles add ownership and
+mutation questions that read-only access does not need. Looking up every Auth0
+account would require privileged Management API credentials; limiting grants
+to previously signed-in local people uses the existing SPA-direct setup.
+
+**Agent direction:** The agent initially kept all cross-user access deferred
+under the repository invariant. The user narrowed the exception to automatic,
+exact-email, read-only live sharing and rejected browsable recipients and
+copyable output. Do not expand this model without another approved decision.
