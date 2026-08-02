@@ -5,11 +5,11 @@ Take-home exercise submission for a Full-Stack Developer role at Bangkok Bank
 
 ## Current status
 
-Phase 3 completes the secured backend API: collection and bookmark CRUD,
-validated pagination, private-by-default Prisma queries, and the approved
-read-only collection sharing and leave routes. The React/Vite shell remains
-minimal; frontend authentication and functional resource UI are intentionally
-deferred.
+Phase 4 completes the private React/Vite client: Auth0 SPA login, callback,
+logout, protected routes, collection and bookmark CRUD, and the approved
+read-only collection-sharing UI. Owners can grant, list, and revoke exact-email
+shares; grantees see a separate read-only collection list and may leave a
+share. The backend remains authoritative for every ownership and sharing rule.
 
 ## Prerequisites
 
@@ -58,8 +58,10 @@ The backend listens on `http://localhost:3001` and accepts browser CORS
 requests only from the frontend at `http://localhost:3000`. `GET /me` requires
 an Auth0 bearer access token for audience
 `https://bbl-candidate-test-api`; it returns only the synchronized Auth0 email.
-The documented collection, bookmark, and share routes are now available. No
-Auth0 client secret is used or required.
+The frontend uses the committed public SPA configuration to obtain that token
+with Authorization Code flow and PKCE. The documented collection, bookmark,
+and share routes are available. No Auth0 client secret or test password is
+committed or required in frontend configuration.
 
 ## Verify
 

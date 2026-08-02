@@ -4,11 +4,13 @@ import type { Collection } from "../types";
 
 type Props = {
   collection: Collection;
-  onDelete: (collection: Collection) => void;
-  onEdit: (collection: Collection) => void;
+  onDelete?: (collection: Collection) => void;
+  onEdit?: (collection: Collection) => void;
+  onLeave?: (collection: Collection) => void;
+  onManageSharing?: (collection: Collection) => void;
 };
 
-export function CollectionCard({ collection, onDelete, onEdit }: Props) {
+export function CollectionCard({ collection, onDelete, onEdit, onLeave, onManageSharing }: Props) {
   return (
     <ListItem
       divider
@@ -21,12 +23,23 @@ export function CollectionCard({ collection, onDelete, onEdit }: Props) {
           >
             Bookmarks
           </Button>
-          <Button onClick={() => onEdit(collection)} size="small">
-            Rename
-          </Button>
-          <Button color="error" onClick={() => onDelete(collection)} size="small">
-            Delete
-          </Button>
+          {collection.access === "owner" ? (
+            <>
+              <Button onClick={() => onManageSharing?.(collection)} size="small">
+                Manage sharing
+              </Button>
+              <Button onClick={() => onEdit?.(collection)} size="small">
+                Rename
+              </Button>
+              <Button color="error" onClick={() => onDelete?.(collection)} size="small">
+                Delete
+              </Button>
+            </>
+          ) : (
+            <Button color="error" onClick={() => onLeave?.(collection)} size="small">
+              Leave shared collection
+            </Button>
+          )}
         </Stack>
       }
     >

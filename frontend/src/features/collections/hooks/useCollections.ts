@@ -2,17 +2,21 @@ import { useCallback, useState } from "react";
 import {
   createCollection,
   deleteCollection,
+  leaveCollection,
   listCollections,
   updateCollection,
 } from "../../../api/collections";
 import { failureStatus } from "../../../api/client";
 import { useAuth } from "../../../auth-context";
 import { PAGE_SIZE, usePagedList } from "../../../hooks/usePagedList";
-import type { Collection, CollectionInput } from "../types";
+import type { Collection, CollectionInput, CollectionScope } from "../types";
 
-export function useCollections() {
+export function useCollections(scope: CollectionScope = "owned") {
   const { requireLogin } = useAuth();
-  const loadPage = useCallback((offset: number) => listCollections(offset, PAGE_SIZE), []);
+  const loadPage = useCallback(
+    (offset: number) => listCollections(offset, PAGE_SIZE, scope),
+    [scope],
+  );
   const paged = usePagedList(loadPage);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -58,5 +62,25 @@ export function useCollections() {
     [paged, requireLogin],
   );
 
-  return { ...paged, remove, save, saving, deleting };
+  const leave = useCallback(
+    async (collection: Collection) => {
+      setDeleting(true);
+      paged.setStatus(undefined);
+      try {
+        await leaveCollection(collection.id);
+        paged.reload();
+        return true;
+      } catch (error) {
+        const status = failureStatus(error);
+        paged.setStatus(status);
+        if (status === 401) requireLogin();
+        return false;
+      } finally {
+        setDeleting(false);
+      }
+    },
+    [paged, requireLogin],
+  );
+
+  return { ...paged, leave, remove, save, saving, deleting };
 }

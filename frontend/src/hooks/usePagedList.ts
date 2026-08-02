@@ -4,7 +4,7 @@ import { useAuth } from "../auth-context";
 
 export const PAGE_SIZE = 50;
 
-export function usePagedList<T>(loadPage: (offset: number) => Promise<T[]>) {
+export function usePagedList<T>(loadPage: (offset: number) => Promise<T[]>, enabled = true) {
   const { requireLogin } = useAuth();
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +15,15 @@ export function usePagedList<T>(loadPage: (offset: number) => Promise<T[]>) {
 
   useEffect(() => {
     let active = true;
+    if (!enabled) {
+      setHasMore(false);
+      setItems([]);
+      setLoading(false);
+      setStatus(undefined);
+      return () => {
+        active = false;
+      };
+    }
     setLoading(true);
     setStatus(undefined);
     void loadPage(0)
@@ -37,7 +46,7 @@ export function usePagedList<T>(loadPage: (offset: number) => Promise<T[]>) {
     return () => {
       active = false;
     };
-  }, [loadPage, reloadToken, requireLogin]);
+  }, [enabled, loadPage, reloadToken, requireLogin]);
 
   const reload = useCallback(() => setReloadToken((value) => value + 1), []);
   const loadMore = useCallback(async () => {

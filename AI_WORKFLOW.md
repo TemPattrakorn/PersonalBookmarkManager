@@ -1,7 +1,6 @@
 # AI workflow
 
-This is a factual working record through Phase 3. It will be refined as later
-phases add frontend authentication and UI evidence.
+This is a factual working record through Phase 4.
 
 ## Tools and task decomposition
 
@@ -24,7 +23,14 @@ local-person upsert, `GET /me`, normalized failures, and HTTP-level security
 tests. Phase 3 completed the backend resource API with strict validation,
 owner-or-grantee read queries, owner-only writes, atomic collection deletion,
 and the approved collection-share lifecycle. Frontend authentication and
-resource UI remain deferred.
+resource UI were then completed in Phase 4. The official Auth0 SPA SDK provides
+Authorization Code with PKCE; the client holds its token only in memory, sends
+it through one authenticated API client, and protects its routes. The UI adds
+owned collection and bookmark CRUD before rendering the narrow sharing surface:
+owner-managed exact-email grants and grantee emails, plus a separate read-only
+shared-collection section with an idempotent leave action. The final structural
+refactor placed feature pages, presentation components, hooks, and API calls in
+their own frontend boundaries without adding dependencies.
 
 Ponytail full mode was used to challenge unnecessary scaffolding. It led to a
 single root lockfile and lint configuration, native npm workspaces, no
@@ -47,6 +53,9 @@ a repository layer or HTTP client.
    created from the committed migration. It reproduces credential, profile,
    persistence, validation, authorization, sharing, and exact-response
    behavior without live Auth0 credentials.
+4. Phase 4 kept sharing controls capability-safe: viewer data receives no
+   owner controls, shared bookmark filters suppress mutation UI, and the server
+   remains responsible for denying every unauthorized request.
 
 ## Failures and recoveries
 
@@ -73,6 +82,12 @@ a repository layer or HTTP client.
    loads those suites in a shared Jest environment; production authentication
    is unchanged. Node 22's built-in SQLite API initializes each temporary test
    database from the committed migration without a persistent test file.
+5. An initial Phase 4 full check used the shell's Node 24 and made the
+   real-Prisma resource harness return sanitized `500` responses during `/me`
+   setup. A direct Node 22.22.0 reproduction and the configured E2E suite both
+   passed, identifying the runtime mismatch rather than an application defect.
+   The final verification explicitly selected the repository's required Node
+   version; no backend behavior was changed to mask the failure.
 
 ## Prompt quality
 
@@ -117,6 +132,13 @@ localhost-listen permission. The final root `npm run check` passed Prisma
 validation and generation, lint, both workspace typechecks, all 25 tests, and
 both production builds. The final diff and ignored-artifact inspection is
 reported in the Phase 3 handoff.
+
+Phase 4 used the same verification command under Node 22.22.0. Prisma
+validation and generation, lint, both workspace typechecks, all 24 backend
+tests, all 9 frontend tests, and both production builds passed. The frontend
+build retains Vite's advisory warning for a chunk above 500 kB; no code-splitting
+was added because it is outside the approved functional scope. The final diff
+and ignored-artifact inspection is reported in the Phase 4 handoff.
 
 Cost and token use were controlled by inspecting only relevant files, running
 independent checks in parallel, reusing npm workspace scripts, and avoiding

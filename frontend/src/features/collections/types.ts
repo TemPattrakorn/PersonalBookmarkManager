@@ -7,3 +7,11 @@ export type Collection = {
 };
 
 export type CollectionInput = Pick<Collection, "name">;
+
+export type CollectionScope = "owned" | "shared";
+
+export type CollectionShare = {
+  createdAt: string;
+  email: string;
+  id: string;
+};

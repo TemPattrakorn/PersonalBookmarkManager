@@ -3,8 +3,8 @@ import type { Bookmark } from "../types";
 
 type Props = {
   bookmark: Bookmark;
-  onDelete: (bookmark: Bookmark) => void;
-  onEdit: (bookmark: Bookmark) => void;
+  onDelete?: (bookmark: Bookmark) => void;
+  onEdit?: (bookmark: Bookmark) => void;
 };
 
 export function BookmarkCard({ bookmark, onDelete, onEdit }: Props) {
@@ -13,14 +13,16 @@ export function BookmarkCard({ bookmark, onDelete, onEdit }: Props) {
       alignItems="flex-start"
       divider
       secondaryAction={
-        <Stack direction="row" spacing={1}>
-          <Button onClick={() => onEdit(bookmark)} size="small">
-            Edit
-          </Button>
-          <Button color="error" onClick={() => onDelete(bookmark)} size="small">
-            Delete
-          </Button>
-        </Stack>
+        bookmark.access === "owner" ? (
+          <Stack direction="row" spacing={1}>
+            <Button onClick={() => onEdit?.(bookmark)} size="small">
+              Edit
+            </Button>
+            <Button color="error" onClick={() => onDelete?.(bookmark)} size="small">
+              Delete
+            </Button>
+          </Stack>
+        ) : undefined
       }
     >
       <ListItemText
