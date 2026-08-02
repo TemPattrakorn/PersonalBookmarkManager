@@ -10,6 +10,7 @@ import {
   type ResourceHarness,
 } from "../../src/resource.test-harness";
 import { createAuthTestKeys, signTestToken, type AuthTestKeys } from "../../src/auth.test-tokens";
+import { CollectionsService } from "../../src/collections.service";
 
 describe("collection and bookmark HTTP contract", () => {
   let keys: AuthTestKeys;
@@ -33,6 +34,7 @@ describe("collection and bookmark HTTP contract", () => {
   });
 
   afterEach(async () => {
+    jest.restoreAllMocks();
     if (harness) {
       await closeResourceHarness(harness);
       harness = undefined;
@@ -214,6 +216,40 @@ describe("collection and bookmark HTTP contract", () => {
       body: { title: "No", url: "https://example.com", collectionId: otherCollection.id },
     });
     await expectNotFound(foreignAssignment);
+  });
+
+  it("does not return bookmarks if a share is revoked after collection access", async () => {
+    const collection = await createCollection("Private");
+    await createBookmark(collection.id);
+    const granteePerson = await harness!.prisma.person.findUniqueOrThrow({
+      where: { auth0Subject: grantee.subject },
+    });
+    const collections = harness!.app.get(CollectionsService);
+    const accessible = collections.accessible.bind(collections);
+    const revokeAfterAccess = async (personId: string, id: string) => {
+      const result = await accessible(personId, id);
+      await harness!.prisma.collectionShare.deleteMany({
+        where: { collectionId: id, granteePersonId: granteePerson.id },
+      });
+      return result;
+    };
+    const accessSpy = jest.spyOn(collections, "accessible");
+
+    for (const path of [
+      `/bookmarks?collectionId=${collection.id}`,
+      `/collections/${collection.id}/bookmarks`,
+    ]) {
+      const grant = await requestAs(harness!, owner, `/collections/${collection.id}/shares`, {
+        method: "POST",
+        body: { email: grantee.email },
+      });
+      expect(grant.status).toBe(201);
+      accessSpy.mockImplementationOnce(revokeAfterAccess);
+
+      const response = await requestAs(harness!, grantee, path);
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual([]);
+    }
   });
 
   async function actor(subject: string, email: string, emailVerified: boolean): Promise<Actor> {

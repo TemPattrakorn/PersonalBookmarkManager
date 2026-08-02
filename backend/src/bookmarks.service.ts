@@ -43,7 +43,7 @@ export class BookmarksService {
     if (collectionId !== undefined) {
       await this.collections.accessible(person.id, collectionId);
       const bookmarks = await this.prisma.bookmark.findMany({
-        where: { collectionId },
+        where: { collectionId, ...accessibleBookmarkWhere(person.id) },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         skip: pagination.offset,
         take: pagination.limit,
@@ -66,7 +66,7 @@ export class BookmarksService {
   ): Promise<BookmarkResponse[]> {
     await this.collections.accessible(person.id, collectionId);
     const bookmarks = await this.prisma.bookmark.findMany({
-      where: { collectionId },
+      where: { collectionId, ...accessibleBookmarkWhere(person.id) },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       skip: pagination.offset,
       take: pagination.limit,
