@@ -1,4 +1,4 @@
-import { Box, Button, ListItem, ListItemText, Stack, Typography } from "@mui/material";
+import { Box, Button, ListItem, Paper, Stack, Typography } from "@mui/material";
 import type { Bookmark } from "../types";
 
 type Props = {
@@ -9,12 +9,18 @@ type Props = {
 
 export function BookmarkCard({ bookmark, onDelete, onEdit }: Props) {
   return (
-    <ListItem
-      alignItems="flex-start"
-      divider
-      secondaryAction={
-        bookmark.access === "owner" ? (
-          <Stack direction="row" spacing={1}>
+    <ListItem disablePadding sx={{ mb: 1 }}>
+      <Paper sx={{ border: 1, borderColor: bookmark.access === "viewer" ? "primary.light" : "divider", p: 2, width: "100%" }}>
+        <Stack direction={{ sm: "row", xs: "column" }} spacing={2} sx={{ justifyContent: "space-between" }}>
+          <Stack spacing={0.75} sx={{ minWidth: 0 }}>
+            <Typography variant="subtitle1">{bookmark.title}</Typography>
+            <Box component="a" href={bookmark.url} rel="noopener noreferrer" sx={{ color: "primary.main", overflowWrap: "anywhere" }} target="_blank">
+              {bookmark.url}
+            </Box>
+            {bookmark.notes ? <Typography color="text.secondary" sx={{ whiteSpace: "pre-wrap" }}>{bookmark.notes}</Typography> : null}
+          </Stack>
+          {bookmark.access === "owner" ? (
+            <Stack direction="row" spacing={1} sx={{ alignSelf: { sm: "flex-start" }, flexShrink: 0, flexWrap: "wrap" }} useFlexGap>
             <Button onClick={() => onEdit?.(bookmark)} size="small">
               Edit
             </Button>
@@ -22,20 +28,9 @@ export function BookmarkCard({ bookmark, onDelete, onEdit }: Props) {
               Delete
             </Button>
           </Stack>
-        ) : undefined
-      }
-    >
-      <ListItemText
-        primary={bookmark.title}
-        secondary={
-          <>
-            <Box component="a" href={bookmark.url} rel="noopener noreferrer" target="_blank">
-              {bookmark.url}
-            </Box>
-            {bookmark.notes ? <Typography component="p">{bookmark.notes}</Typography> : null}
-          </>
-        }
-      />
+          ) : null}
+        </Stack>
+      </Paper>
     </ListItem>
   );
 }

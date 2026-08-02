@@ -19,6 +19,7 @@ export function BookmarkFilters({ activeCollection, collections, onChange, value
       label="Filter by collection"
       onChange={(event) => onChange(event.target.value)}
       select
+      sx={{ mt: 3, width: { sm: 320, xs: "100%" } }}
       value={value}
     >
       <MenuItem value="">All bookmarks</MenuItem>

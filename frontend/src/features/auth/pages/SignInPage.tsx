@@ -26,13 +26,7 @@ export function SignInPage({ error = false }: { error?: boolean }) {
           <Alert severity="error">We couldn&apos;t sign you in. Please try again.</Alert>
         ) : null}
         <Typography>Sign in to access your private bookmarks.</Typography>
-        <Button
-          disabled={submitting}
-          fullWidth
-          onClick={() => void beginLogin()}
-          size="large"
-          variant="contained"
-        >
+        <Button disabled={submitting} fullWidth onClick={() => void beginLogin()} size="large" variant="contained">
           {submitting ? "Redirecting…" : "Sign in"}
         </Button>
       </Stack>

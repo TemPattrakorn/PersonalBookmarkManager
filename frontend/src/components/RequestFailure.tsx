@@ -20,7 +20,7 @@ export function RequestFailure({
     <Alert
       action={onRetry ? <Button color="inherit" onClick={onRetry}>Retry</Button> : undefined}
       severity={status === 400 ? "warning" : "error"}
-      sx={{ mt: 2 }}
+      sx={{ mt: 2, wordBreak: "break-word" }}
     >
       {message}
     </Alert>

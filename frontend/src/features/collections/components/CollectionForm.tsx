@@ -1,4 +1,4 @@
-import { Button, Stack, TextField } from "@mui/material";
+import { Button, Paper, Stack, TextField } from "@mui/material";
 import { useEffect, useState, type FormEvent } from "react";
 import type { Collection, CollectionInput } from "../types";
 
@@ -20,20 +20,23 @@ export function CollectionForm({ editing, onCancel, onSubmit, saving }: Props) {
   };
 
   return (
-    <Stack component="form" noValidate onSubmit={submit} spacing={2} sx={{ mt: 3 }}>
-      <TextField
-        label="Collection name"
-        onChange={(event) => setName(event.target.value)}
-        required
-        slotProps={{ htmlInput: { maxLength: 100 } }}
-        value={name}
-      />
-      <Stack direction="row" spacing={1}>
-        <Button disabled={saving} type="submit" variant="contained">
-          {saving ? "Saving…" : editing ? "Save collection" : "Add collection"}
-        </Button>
-        {editing ? <Button onClick={onCancel}>Cancel</Button> : null}
+    <Paper component="form" noValidate onSubmit={submit} sx={{ border: 1, borderColor: "divider", mt: 3, p: 2 }}>
+      <Stack direction={{ sm: "row", xs: "column" }} spacing={2}>
+        <TextField
+          label="Collection name"
+          onChange={(event) => setName(event.target.value)}
+          required
+          slotProps={{ htmlInput: { maxLength: 100 } }}
+          sx={{ flex: 1 }}
+          value={name}
+        />
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }} useFlexGap>
+          <Button disabled={saving} type="submit" variant="contained">
+            {saving ? "Saving…" : editing ? "Save collection" : "Add collection"}
+          </Button>
+          {editing ? <Button onClick={onCancel}>Cancel</Button> : null}
+        </Stack>
       </Stack>
-    </Stack>
+    </Paper>
   );
 }

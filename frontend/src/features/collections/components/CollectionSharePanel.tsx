@@ -1,4 +1,4 @@
-import { Button, CircularProgress, List, ListItem, ListItemText, Stack, TextField, Typography } from "@mui/material";
+import { Button, CircularProgress, List, ListItem, ListItemText, Paper, Stack, TextField, Typography } from "@mui/material";
 import { useState, type FormEvent } from "react";
 import { LoadMoreButton } from "../../../components/LoadMoreButton";
 import { RequestFailure } from "../../../components/RequestFailure";
@@ -14,7 +14,8 @@ export function CollectionSharePanel({ collectionId }: { collectionId: string })
   };
 
   return (
-    <Stack spacing={2} sx={{ pb: 2, pt: 1, width: "100%" }}>
+    <Paper sx={{ backgroundColor: "action.hover", border: 1, borderColor: "divider", p: 2, width: "100%" }}>
+      <Stack spacing={2}>
       <Typography component="h3" variant="h6">
         Manage sharing
       </Typography>
@@ -37,9 +38,10 @@ export function CollectionSharePanel({ collectionId }: { collectionId: string })
           <CircularProgress aria-label="Loading collection shares" />
         </Stack>
       ) : shares.loaded ? (
-        <List aria-label="Current grantees">
+        <List aria-label="Current grantees" disablePadding>
           {shares.items.map((share) => (
             <ListItem
+              divider
               key={share.id}
               secondaryAction={
                 <Button
@@ -61,6 +63,7 @@ export function CollectionSharePanel({ collectionId }: { collectionId: string })
       {shares.hasMore ? (
         <LoadMoreButton disabled={shares.loadingMore} onClick={() => void shares.loadMore()} />
       ) : null}
-    </Stack>
+      </Stack>
+    </Paper>
   );
 }
