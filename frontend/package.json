@@ -10,6 +10,7 @@
     "build": "tsc --noEmit && vite build"
   },
   "dependencies": {
+    "@auth0/auth0-spa-js": "^2.24.1",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@mui/material": "9.2.0",
