@@ -55,6 +55,11 @@ revoke access. A grantee may read the shared collection and the bookmarks
 currently in it, but may not change, delete, or reshare anything. The owner may
 list the exact emails already granted on that collection and revoke any grant.
 
+The submitted email is trimmed before validation and lookup. The trimmed value
+must be a string from 3 through 254 characters, contain exactly one `@`, have
+non-empty local and domain parts, and contain no whitespace. Lowercasing is
+used only for lookup; no provider-specific rewriting is applied.
+
 Sharing is automatic when the submitted email uniquely matches an eligible
 account. Repeating the same grant is idempotent. There is no user directory,
 name browsing, shareable link, copy, role, pending invitation, notification,

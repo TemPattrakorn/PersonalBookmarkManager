@@ -25,16 +25,22 @@ Response:
 
 ```json
 {
-  "id": "share-id",
+  "id": "80a5cde8-3ee6-4de6-a049-7838786a57dc",
   "email": "grantee@example.com",
   "createdAt": "2026-07-30T00:00:00.000Z"
 }
 ```
 
-Malformed email and self-sharing return `400 Bad Request`. An unavailable
-collection, or an email with zero, multiple, or no verified eligible matches,
-returns the same generic `404 Not Found` response. The API provides no account
-search, suggestions, names, invitation, notification, or shareable output.
+The submitted email must be a string. The API trims surrounding whitespace;
+the trimmed value must contain 3 through 254 characters, exactly one `@`,
+non-empty local and domain parts, and no whitespace. Lowercasing is used only
+for lookup, with no provider-specific rewriting. A value that fails these
+rules, or self-sharing, returns `400 Bad Request`.
+
+An unavailable collection, or an email with zero, multiple, or no verified
+eligible matches, returns the same generic `404 Not Found` response. The API
+provides no account search, suggestions, names, invitation, notification, or
+shareable output.
 
 ## List current grants
 
@@ -81,7 +87,8 @@ same person access again later; leaving creates no block or history record.
 Future automated tests must cover:
 
 - creating a grant and repeating it without a duplicate;
-- malformed email, self-sharing, and unknown, unverified, or ambiguous email;
+- email length, separator, whitespace, self-sharing, unknown, unverified, and
+  ambiguous-recipient cases;
 - listing only the owner's current grantee emails;
 - grantee collection, filtered bookmark, nested bookmark, and direct bookmark
   reads;
