@@ -124,7 +124,7 @@ database initialized from the committed migration, so they need no live
 credentials. They seed owner, grantee, and outsider identities to verify the
 private-by-default and approved-share behavior.
 
-The Phase 10 repository gate on 2026-08-02 passed all 29 backend and 13
+The Repository gate on 2026-08-02 passed all 29 backend and 13
 frontend tests, in addition to Prisma validation/generation, lint, typechecks,
 and production builds. Vite reports a non-failing advisory that the production
 JavaScript bundle exceeds 500 kB.
