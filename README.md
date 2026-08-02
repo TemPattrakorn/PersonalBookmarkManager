@@ -5,12 +5,11 @@ Take-home exercise submission for a Full-Stack Developer role at Bangkok Bank
 
 ## Current status
 
-Phase 2 adds global Auth0 access-token verification, per-request `/userinfo`
-identity synchronization, local person persistence, sanitized authentication
-errors, and `GET /me` to the Phase 1 NestJS/Prisma/SQLite foundation. The
-React/Vite shell remains minimal. Bookmark, collection, and sharing routes,
-frontend authentication, seed data, and functional resource UI are
-intentionally not implemented yet.
+Phase 3 completes the secured backend API: collection and bookmark CRUD,
+validated pagination, private-by-default Prisma queries, and the approved
+read-only collection sharing and leave routes. The React/Vite shell remains
+minimal; frontend authentication and functional resource UI are intentionally
+deferred.
 
 ## Prerequisites
 
@@ -59,8 +58,8 @@ The backend listens on `http://localhost:3001` and accepts browser CORS
 requests only from the frontend at `http://localhost:3000`. `GET /me` requires
 an Auth0 bearer access token for audience
 `https://bbl-candidate-test-api`; it returns only the synchronized Auth0 email.
-All other routes are currently unimplemented and return the normalized generic
-`404` response. No Auth0 client secret is used or required.
+The documented collection, bookmark, and share routes are now available. No
+Auth0 client secret is used or required.
 
 ## Verify
 
@@ -81,6 +80,7 @@ npm test
 npm run build
 ```
 
-Phase 2 authentication tests run against an ephemeral local Auth0 stub and do
-not need live credentials. There is no seed data yet; owner, grantee, and
-outsider fixtures will be added with authenticated resource behavior.
+The HTTP tests run against an ephemeral local Auth0 stub and a temporary SQLite
+database initialized from the committed migration, so they need no live
+credentials. They seed owner, grantee, and outsider identities to verify the
+private-by-default and approved-share behavior.

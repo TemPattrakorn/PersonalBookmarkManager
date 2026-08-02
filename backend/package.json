@@ -41,7 +41,7 @@
       "ts"
     ],
     "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "testRegex": "(api-exception\\.filter|app\\.module|http\\.e2e)\\.spec\\.ts$",
     "transform": {
       "^.+\\.ts$": [
         "ts-jest",

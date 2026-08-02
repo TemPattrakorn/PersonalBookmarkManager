@@ -1,7 +1,7 @@
 # AI workflow
 
-This is a factual working record through Phase 2. It will be refined as later
-phases add resource authorization and sharing evidence.
+This is a factual working record through Phase 3. It will be refined as later
+phases add frontend authentication and UI evidence.
 
 ## Tools and task decomposition
 
@@ -21,8 +21,10 @@ schema and migration, a React/Router/MUI shell, smoke tests, documentation, and
 one reusable verification command. Phase 2 added the first authenticated
 vertical slice: global token verification, Auth0 profile synchronization,
 local-person upsert, `GET /me`, normalized failures, and HTTP-level security
-tests. Resource routes, frontend authentication, seed users, resource UI, and
-sharing tests remain deferred.
+tests. Phase 3 completed the backend resource API with strict validation,
+owner-or-grantee read queries, owner-only writes, atomic collection deletion,
+and the approved collection-share lifecycle. Frontend authentication and
+resource UI remain deferred.
 
 Ponytail full mode was used to challenge unnecessary scaffolding. It led to a
 single root lockfile and lint configuration, native npm workspaces, no
@@ -40,10 +42,11 @@ a repository layer or HTTP client.
 2. Root workspace scripts provide one repeatable gate across Prisma, backend,
    and frontend work. Prisma client generation runs during install and backend
    builds, so generated code does not need to be tracked.
-3. The Phase 2 HTTP suite uses local Auth0 discovery, JWKS, and `/userinfo`
-   endpoints with generated RS256 tokens. It reproduces credential, profile,
-   timeout, upstream, persistence, and exact-response behavior without live
-   Auth0 credentials.
+3. The Phase 2/3 HTTP suite uses local Auth0 discovery, JWKS, and `/userinfo`
+   endpoints with generated RS256 tokens plus a temporary SQLite database
+   created from the committed migration. It reproduces credential, profile,
+   persistence, validation, authorization, sharing, and exact-response
+   behavior without live Auth0 credentials.
 
 ## Failures and recoveries
 
@@ -65,12 +68,19 @@ a repository layer or HTTP client.
    release and the CommonJS application build. The sandbox initially blocked
    the test servers' local ports; the same tests passed with approved
    localhost-listen permission.
+4. Phase 3's additional ESM-backed HTTP suites exposed Jest's isolated-module
+   limit for the native dynamic `jose` import. One HTTP test entrypoint now
+   loads those suites in a shared Jest environment; production authentication
+   is unchanged. Node 22's built-in SQLite API initializes each temporary test
+   database from the committed migration without a persistent test file.
 
 ## Prompt quality
 
 The effective prompts were the approved phase plans: they named exact
 versions, boundaries, artifacts, security behavior, and checks. Phase 2's
-explicit 401/503 matrix made credential and outage behavior directly testable.
+explicit 401/503 matrix made credential and outage behavior directly testable;
+Phase 3's endpoint and privacy matrix kept read sharing from becoming mutation
+or user-browsing access.
 
 The initial broad request to start building from `AGENTS.md` was not precise
 enough to authorize safe edits because deletion, sharing, validation, and API
@@ -100,6 +110,13 @@ permission. The final root `npm run check` then passed Prisma validation and
 generation, lint, both workspace typechecks, all 18 tests, and both production
 builds. The final diff and ignored-artifact inspection is reported in the
 Phase 2 handoff.
+
+Phase 3 focused resource and sharing tests passed against the temporary SQLite
+database under Node 22.22.0; the HTTP tests again required approved
+localhost-listen permission. The final root `npm run check` passed Prisma
+validation and generation, lint, both workspace typechecks, all 25 tests, and
+both production builds. The final diff and ignored-artifact inspection is
+reported in the Phase 3 handoff.
 
 Cost and token use were controlled by inspecting only relevant files, running
 independent checks in parallel, reusing npm workspace scripts, and avoiding

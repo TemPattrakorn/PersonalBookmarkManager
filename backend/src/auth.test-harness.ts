@@ -50,6 +50,7 @@ export type AuthHarness = {
 export async function startAuthHarness(
   jwk: Record<string, unknown>,
   timeoutMs = 500,
+  prismaOverride?: Pick<PrismaService, "person">,
 ): Promise<AuthHarness> {
   const state: Auth0State = {
     discovery: {},
@@ -115,7 +116,7 @@ export async function startAuthHarness(
     .overrideProvider(AUTH_CONFIG)
     .useValue(config)
     .overrideProvider(PrismaService)
-    .useValue({ person: { upsert } })
+    .useValue(prismaOverride ?? { person: { upsert } })
     .compile();
   const app = module.createNestApplication();
   await app.listen(0, "127.0.0.1");
@@ -146,9 +147,17 @@ export async function request(
   baseUrl: string,
   path: string,
   authorization?: string,
+  options: { body?: string; contentType?: string; method?: string } = {},
 ): Promise<Response> {
   return fetch(`${baseUrl}${path}`, {
-    headers: authorization ? { authorization } : undefined,
+    method: options.method,
+    body: options.body,
+    headers: {
+      ...(authorization ? { authorization } : {}),
+      ...(options.body !== undefined
+        ? { "content-type": options.contentType ?? "application/json" }
+        : {}),
+    },
   });
 }
 
