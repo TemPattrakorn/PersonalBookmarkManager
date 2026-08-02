@@ -17,212 +17,16 @@ import {
   Typography,
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { Link as RouterLink, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { apiRequest, failureStatus } from "./api/client";
 import { useAuth } from "./auth-context";
 import { LoadMoreButton } from "./components/LoadMoreButton";
 import { RequestFailure } from "./components/RequestFailure";
+import { WorkspaceLayout } from "./components/WorkspaceLayout";
 import type { Bookmark } from "./features/bookmarks/types";
 import type { Collection } from "./features/collections/types";
 import { PAGE_SIZE, usePagedList } from "./hooks/usePagedList";
-
-function Workspace({ children, title }: { children: React.ReactNode; title: string }) {
-  const { logout } = useAuth();
-  const [signingOut, setSigningOut] = useState(false);
-  const [logoutFailed, setLogoutFailed] = useState(false);
-
-  return (
-    <Box component="main" sx={{ margin: "0 auto", maxWidth: 960, p: 4 }}>
-      <Stack
-        direction={{ sm: "row", xs: "column" }}
-        spacing={2}
-        sx={{ justifyContent: "space-between" }}
-      >
-        <Typography component="h1" variant="h4">
-          Personal Bookmark Manager
-        </Typography>
-        <Stack direction="row" spacing={1}>
-          <Button component={RouterLink} to="/collections">
-            Collections
-          </Button>
-          <Button component={RouterLink} to="/bookmarks">
-            Bookmarks
-          </Button>
-          <Button
-            disabled={signingOut}
-            onClick={() => {
-              setSigningOut(true);
-              setLogoutFailed(false);
-              void logout().catch(() => {
-                setSigningOut(false);
-                setLogoutFailed(true);
-              });
-            }}
-            variant="outlined"
-          >
-            Sign out
-          </Button>
-        </Stack>
-      </Stack>
-      <Typography component="h2" sx={{ mt: 4 }} variant="h5">
-        {title}
-      </Typography>
-      {logoutFailed ? (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          We couldn&apos;t sign you out. Please try again.
-        </Alert>
-      ) : null}
-      {children}
-    </Box>
-  );
-}
-
-export function CollectionsPage() {
-  const { requireLogin } = useAuth();
-  const loadPage = useCallback(
-    (offset: number) => apiRequest<Collection[]>(`/collections?limit=${PAGE_SIZE}&offset=${offset}`),
-    [],
-  );
-  const { hasMore, items, loadMore, loading, loadingMore, reload, setStatus, status } =
-    usePagedList(loadPage);
-  const [name, setName] = useState("");
-  const [editing, setEditing] = useState<Collection>();
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState<Collection>();
-  const [deletingNow, setDeletingNow] = useState(false);
-
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSaving(true);
-    setStatus(undefined);
-    try {
-      if (editing) {
-        await apiRequest<Collection>(`/collections/${editing.id}`, {
-          body: JSON.stringify({ name }),
-          method: "PATCH",
-        });
-      } else {
-        await apiRequest<Collection>("/collections", {
-          body: JSON.stringify({ name }),
-          method: "POST",
-        });
-      }
-      setEditing(undefined);
-      setName("");
-      reload();
-    } catch (error) {
-      const status = failureStatus(error);
-      setStatus(status);
-      if (status === 401) requireLogin();
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const deleteCollection = async () => {
-    if (!deleting) return;
-    setDeletingNow(true);
-    setStatus(undefined);
-    try {
-      await apiRequest<void>(`/collections/${deleting.id}`, { method: "DELETE" });
-      setDeleting(undefined);
-      reload();
-    } catch (error) {
-      const status = failureStatus(error);
-      setStatus(status);
-      if (status === 401) requireLogin();
-    } finally {
-      setDeletingNow(false);
-    }
-  };
-
-  return (
-    <Workspace title="Collections">
-      <Stack component="form" noValidate onSubmit={submit} spacing={2} sx={{ mt: 3 }}>
-        <TextField
-          label="Collection name"
-          onChange={(event) => setName(event.target.value)}
-          required
-          slotProps={{ htmlInput: { maxLength: 100 } }}
-          value={name}
-        />
-        <Stack direction="row" spacing={1}>
-          <Button disabled={saving} type="submit" variant="contained">
-            {saving ? "Saving…" : editing ? "Save collection" : "Add collection"}
-          </Button>
-          {editing ? (
-            <Button
-              onClick={() => {
-                setEditing(undefined);
-                setName("");
-              }}
-            >
-              Cancel
-            </Button>
-          ) : null}
-        </Stack>
-      </Stack>
-      <RequestFailure status={status} />
-      {loading ? (
-        <Stack role="status" sx={{ alignItems: "center", mt: 4 }}>
-          <CircularProgress aria-label="Loading collections" />
-        </Stack>
-      ) : (
-        <List aria-label="Your collections" sx={{ mt: 2 }}>
-          {items.map((collection) => (
-            <ListItem
-              divider
-              key={collection.id}
-              secondaryAction={
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    component={RouterLink}
-                    size="small"
-                    to={`/bookmarks?collectionId=${encodeURIComponent(collection.id)}`}
-                  >
-                    Bookmarks
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setEditing(collection);
-                      setName(collection.name);
-                    }}
-                    size="small"
-                  >
-                    Rename
-                  </Button>
-                  <Button color="error" onClick={() => setDeleting(collection)} size="small">
-                    Delete
-                  </Button>
-                </Stack>
-              }
-            >
-              <ListItemText primary={collection.name} />
-            </ListItem>
-          ))}
-          {items.length === 0 ? <ListItem>Your collections will appear here.</ListItem> : null}
-        </List>
-      )}
-      {hasMore ? <LoadMoreButton disabled={loadingMore} onClick={() => void loadMore()} /> : null}
-      <Dialog onClose={() => setDeleting(undefined)} open={deleting !== undefined}>
-        <DialogTitle>Delete collection?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Bookmarks in this collection will be kept and become uncategorized.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button disabled={deletingNow} onClick={() => setDeleting(undefined)}>
-            Cancel
-          </Button>
-          <Button color="error" disabled={deletingNow} onClick={() => void deleteCollection()}>
-            Delete collection
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Workspace>
-  );
-}
+export { CollectionsListPage as CollectionsPage } from "./features/collections/pages/CollectionsListPage";
 
 export function BookmarksPage() {
   const { requireLogin } = useAuth();
@@ -331,7 +135,7 @@ export function BookmarksPage() {
     : "";
 
   return (
-    <Workspace title="Bookmarks">
+    <WorkspaceLayout title="Bookmarks">
       <Stack component="form" noValidate onSubmit={submit} spacing={2} sx={{ mt: 3 }}>
         <TextField
           label="Title"
@@ -455,6 +259,6 @@ export function BookmarksPage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </Workspace>
+    </WorkspaceLayout>
   );
 }
