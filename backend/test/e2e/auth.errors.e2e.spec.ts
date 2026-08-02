@@ -1,18 +1,18 @@
 import {
   expectAuthenticationRequired,
   expectServiceUnavailable,
-} from "../../src/auth.test-assertions";
+} from "../support/auth.test-assertions";
 import {
   closeAuthHarness,
   request,
   startAuthHarness,
   type AuthHarness,
-} from "../../src/auth.test-harness";
+} from "../support/auth.test-harness";
 import {
   createAuthTestKeys,
   signTestToken,
   type AuthTestKeys,
-} from "../../src/auth.test-tokens";
+} from "../support/auth.test-tokens";
 
 describe("authentication error HTTP contract", () => {
   let keys: AuthTestKeys;

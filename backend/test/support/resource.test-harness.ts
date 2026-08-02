@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient } from "./generated/prisma/client";
+import { PrismaClient } from "../../src/generated/prisma/client";
 import {
   closeAuthHarness,
   request,
@@ -31,7 +31,7 @@ export async function startResourceHarness(
   const database = new DatabaseSync(databasePath);
   database.exec(
     await readFile(
-      join(__dirname, "../prisma/migrations/20260802093000_init/migration.sql"),
+      join(__dirname, "../../prisma/migrations/20260802093000_init/migration.sql"),
       "utf8",
     ),
   );

@@ -1,4 +1,4 @@
-import { getJose } from "./jose.loader";
+import { getJose } from "../../src/jose.loader";
 
 export type AuthTestKeys = {
   privateKey: CryptoKey;

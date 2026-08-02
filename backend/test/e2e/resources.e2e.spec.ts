@@ -1,15 +1,15 @@
 import {
   expectNotFound,
   expectValidationFailure,
-} from "../../src/auth.test-assertions";
+} from "../support/auth.test-assertions";
 import {
   closeResourceHarness,
   requestAs,
   startResourceHarness,
   type Actor,
   type ResourceHarness,
-} from "../../src/resource.test-harness";
-import { createAuthTestKeys, signTestToken, type AuthTestKeys } from "../../src/auth.test-tokens";
+} from "../support/resource.test-harness";
+import { createAuthTestKeys, signTestToken, type AuthTestKeys } from "../support/auth.test-tokens";
 import { CollectionsService } from "../../src/collections.service";
 
 describe("collection and bookmark HTTP contract", () => {

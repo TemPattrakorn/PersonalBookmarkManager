@@ -9,7 +9,7 @@ import type { Response } from "express";
 import {
   AuthenticationRequiredError,
   Auth0UnavailableError,
-} from "./auth.contract";
+} from "../../auth.contract";
 
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {

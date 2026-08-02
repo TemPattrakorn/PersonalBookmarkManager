@@ -15,7 +15,7 @@ import {
   parseBookmarkListQuery,
   parseBookmarkPatch,
   parseUuid,
-} from "./request-validation";
+} from "./common/http/request-validation";
 
 @Controller("bookmarks")
 export class BookmarksController {

@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import type { Collection, Person } from "./generated/prisma/client";
-import { PrismaService } from "./prisma.service";
-import { accessibleCollectionWhere, ownedCollectionWhere } from "./resource-access";
-import type { Pagination } from "./request-validation";
+import type { Pagination } from "./common/http/request-validation";
+import {
+  accessibleCollectionWhere,
+  ownedCollectionWhere,
+} from "./common/security/resource-access";
+import { PrismaService } from "./core/database/prisma.service";
 
 export type CollectionResponse = {
   id: string;

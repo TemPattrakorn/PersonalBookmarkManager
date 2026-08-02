@@ -1,6 +1,6 @@
 import { Test } from "@nestjs/testing";
 import { AppModule } from "./app.module";
-import { PrismaService } from "./prisma.service";
+import { PrismaService } from "./core/database/prisma.service";
 
 describe("AppModule", () => {
   it("compiles with the Prisma provider", async () => {

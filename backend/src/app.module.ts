@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
-import { ApiExceptionFilter } from "./api-exception.filter";
+import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
+import { PrismaModule } from "./core/database/prisma.module";
 import { AuthGuard } from "./auth.guard";
 import { AUTH_CONFIG, authConfig } from "./auth.contract";
 import { Auth0Client } from "./auth0.client";
@@ -11,7 +12,6 @@ import { BookmarksService } from "./bookmarks.service";
 import { CollectionsController } from "./collections.controller";
 import { CollectionsService } from "./collections.service";
 import { MeController } from "./me.controller";
-import { PrismaModule } from "./prisma.module";
 import { SharesService } from "./shares.service";
 
 @Module({

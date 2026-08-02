@@ -2,10 +2,10 @@ import { type INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { AppModule } from "./app.module";
-import { AUTH_CONFIG, type AuthConfig } from "./auth.contract";
-import type { Person } from "./generated/prisma/client";
-import { PrismaService } from "./prisma.service";
+import { AppModule } from "../../src/app.module";
+import { AUTH_CONFIG, type AuthConfig } from "../../src/auth.contract";
+import { PrismaService } from "../../src/core/database/prisma.service";
+import type { Person } from "../../src/generated/prisma/client";
 
 type Reply = {
   body?: unknown;

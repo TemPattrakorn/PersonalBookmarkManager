@@ -1,4 +1,4 @@
-import type { Prisma } from "./generated/prisma/client";
+import type { Prisma } from "../../generated/prisma/client";
 
 export function ownedCollectionWhere(personId: string, id?: string): Prisma.CollectionWhereInput {
   return { ...(id ? { id } : {}), ownerId: personId };

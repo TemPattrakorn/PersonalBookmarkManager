@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import type { Person } from "./generated/prisma/client";
 import { Auth0Client } from "./auth0.client";
-import { PrismaService } from "./prisma.service";
+import { PrismaService } from "./core/database/prisma.service";
 
 @Injectable()
 export class AuthService {

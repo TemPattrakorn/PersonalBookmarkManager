@@ -20,7 +20,7 @@ import {
   parsePagination,
   parseShareCreate,
   parseUuid,
-} from "./request-validation";
+} from "./common/http/request-validation";
 import { SharesService, type ShareResponse } from "./shares.service";
 
 @Controller("collections")
