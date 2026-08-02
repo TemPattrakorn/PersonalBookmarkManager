@@ -1,32 +1,13 @@
 import { Module } from "@nestjs/common";
-import { APP_FILTER, APP_GUARD } from "@nestjs/core";
+import { APP_FILTER } from "@nestjs/core";
 import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
-import { PrismaModule } from "./core/database/prisma.module";
-import { AuthGuard } from "./auth.guard";
-import { AUTH_CONFIG, authConfig } from "./auth.contract";
-import { Auth0Client } from "./auth0.client";
-import { Auth0Transport } from "./auth0.transport";
-import { AuthService } from "./auth.service";
-import { BookmarksController } from "./bookmarks.controller";
-import { BookmarksService } from "./bookmarks.service";
-import { CollectionsController } from "./collections.controller";
-import { CollectionsService } from "./collections.service";
-import { MeController } from "./me.controller";
-import { SharesService } from "./shares.service";
+import { AuthModule } from "./modules/auth/auth.module";
+import { BookmarksModule } from "./modules/bookmarks/bookmarks.module";
+import { CollectionsModule } from "./modules/collections/collections.module";
+import { SharesModule } from "./modules/shares/shares.module";
 
 @Module({
-  imports: [PrismaModule],
-  controllers: [MeController, CollectionsController, BookmarksController],
-  providers: [
-    Auth0Transport,
-    Auth0Client,
-    AuthService,
-    CollectionsService,
-    BookmarksService,
-    SharesService,
-    { provide: AUTH_CONFIG, useValue: authConfig },
-    { provide: APP_GUARD, useClass: AuthGuard },
-    { provide: APP_FILTER, useClass: ApiExceptionFilter },
-  ],
+  imports: [AuthModule, CollectionsModule, BookmarksModule, SharesModule],
+  providers: [{ provide: APP_FILTER, useClass: ApiExceptionFilter }],
 })
 export class AppModule {}

@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import type { Bookmark, Person } from "./generated/prisma/client";
-import { PrismaService } from "./core/database/prisma.service";
-import { CollectionsService } from "./collections.service";
-import { accessibleBookmarkWhere } from "./common/security/resource-access";
+import type { Bookmark, Person } from "../../generated/prisma/client";
+import { PrismaService } from "../../core/database/prisma.service";
+import { CollectionsService } from "../collections/collections.service";
+import { accessibleBookmarkWhere } from "../../common/security/resource-access";
 import type {
   BookmarkCreateInput,
   BookmarkPatchInput,
   Pagination,
-} from "./common/http/request-validation";
+} from "../../common/http/request-validation";
 
 export type BookmarkResponse = {
   id: string;

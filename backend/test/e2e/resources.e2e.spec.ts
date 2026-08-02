@@ -10,7 +10,7 @@ import {
   type ResourceHarness,
 } from "../support/resource.test-harness";
 import { createAuthTestKeys, signTestToken, type AuthTestKeys } from "../support/auth.test-tokens";
-import { CollectionsService } from "../../src/collections.service";
+import { CollectionsService } from "../../src/modules/collections/collections.service";
 
 describe("collection and bookmark HTTP contract", () => {
   let keys: AuthTestKeys;

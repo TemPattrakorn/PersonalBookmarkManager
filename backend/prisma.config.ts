@@ -1,5 +1,5 @@
 import { defineConfig } from "prisma/config";
-import { loadEnvironment } from "./src/load-environment";
+import { loadEnvironment } from "./src/core/config/load-environment";
 
 loadEnvironment();
 

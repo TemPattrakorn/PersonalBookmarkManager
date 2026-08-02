@@ -8,14 +8,14 @@ import {
   Post,
   Req,
 } from "@nestjs/common";
-import type { AuthenticatedRequest } from "./auth.guard";
+import type { AuthenticatedRequest } from "../auth/auth.guard";
 import { BookmarksService, type BookmarkResponse } from "./bookmarks.service";
 import {
   parseBookmarkCreate,
   parseBookmarkListQuery,
   parseBookmarkPatch,
   parseUuid,
-} from "./common/http/request-validation";
+} from "../../common/http/request-validation";
 
 @Controller("bookmarks")
 export class BookmarksController {

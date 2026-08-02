@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import type { Request } from "express";
-import type { Person } from "./generated/prisma/client";
+import type { Person } from "../../generated/prisma/client";
 import { AuthService } from "./auth.service";
 
 export type AuthenticatedRequest = Request & { person: Person };

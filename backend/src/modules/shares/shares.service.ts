@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import type { CollectionShare, Person } from "./generated/prisma/client";
-import { PrismaService } from "./core/database/prisma.service";
-import { CollectionsService } from "./collections.service";
-import type { Pagination } from "./common/http/request-validation";
+import type { CollectionShare, Person } from "../../generated/prisma/client";
+import { PrismaService } from "../../core/database/prisma.service";
+import { CollectionsService } from "../collections/collections.service";
+import type { Pagination } from "../../common/http/request-validation";
 
 export type ShareResponse = { id: string; email: string; createdAt: Date };
 export type ShareCreateResponse = ShareResponse & { created: boolean };
