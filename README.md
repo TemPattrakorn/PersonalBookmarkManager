@@ -106,13 +106,13 @@ npm test --workspace backend -- --verbose
 To run one focused test file:
 
 ```sh
-npm test --workspace backend -- --runTestsByPath src/api-exception.filter.spec.ts --verbose
+npm test --workspace backend -- --runTestsByPath src/common/filters/api-exception.filter.spec.ts --verbose
 ```
 
-To select the multi-user sharing HTTP entry point:
+To run the multi-user sharing HTTP tests:
 
 ```sh
-npm test --workspace backend -- --runTestsByPath test/e2e/http.e2e.spec.ts --verbose
+npm test --workspace backend -- --runTestsByPath test/e2e/shares.e2e.spec.ts --verbose
 ```
 
 The E2E invocation currently may print only Node's experimental VM-modules

@@ -43,7 +43,7 @@
     "rootDir": ".",
     "testMatch": [
       "<rootDir>/src/**/*.spec.ts",
-      "<rootDir>/test/e2e/http.e2e.spec.ts"
+      "<rootDir>/test/e2e/**/*.e2e.spec.ts"
     ],
     "transform": {
       "^.+\\.ts$": [
