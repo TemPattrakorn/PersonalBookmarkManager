@@ -1,4 +1,4 @@
-import { CircularProgress, List, ListItem, Stack, Typography } from "@mui/material";
+import { CircularProgress, List, ListItem, Paper, Stack, Typography } from "@mui/material";
 import { Fragment, useState } from "react";
 import { LoadMoreButton } from "../../../components/LoadMoreButton";
 import { RequestFailure } from "../../../components/RequestFailure";
@@ -40,7 +40,7 @@ export function CollectionsListPage() {
           <CircularProgress aria-label="Loading collections" />
         </Stack>
       ) : collections.loaded ? (
-        <List aria-label="Your collections" sx={{ mt: 2 }}>
+        <List aria-label="Your collections" disablePadding sx={{ mt: 2 }}>
           {collections.items.map((collection) => (
             <Fragment key={collection.id}>
               <CollectionCard
@@ -58,13 +58,19 @@ export function CollectionsListPage() {
               ) : null}
             </Fragment>
           ))}
-          {collections.items.length === 0 ? <ListItem>Your collections will appear here.</ListItem> : null}
+          {collections.items.length === 0 ? (
+            <ListItem disablePadding>
+              <Paper sx={{ border: 1, borderColor: "divider", color: "text.secondary", p: 2, width: "100%" }}>
+                Your collections will appear here.
+              </Paper>
+            </ListItem>
+          ) : null}
         </List>
       ) : null}
       {collections.hasMore ? (
         <LoadMoreButton disabled={collections.loadingMore} onClick={() => void collections.loadMore()} />
       ) : null}
-      <Typography component="h2" sx={{ mt: 4 }} variant="h5">
+      <Typography component="h2" sx={{ mt: 5 }} variant="h5">
         Shared by others
       </Typography>
       <RequestFailure
@@ -76,11 +82,17 @@ export function CollectionsListPage() {
           <CircularProgress aria-label="Loading shared collections" />
         </Stack>
       ) : sharedCollections.loaded ? (
-        <List aria-label="Collections shared by others" sx={{ mt: 2 }}>
+        <List aria-label="Collections shared by others" disablePadding sx={{ mt: 2 }}>
           {sharedCollections.items.map((collection) => (
             <CollectionCard collection={collection} key={collection.id} onLeave={setLeaving} />
           ))}
-          {sharedCollections.items.length === 0 ? <ListItem>No shared collections.</ListItem> : null}
+          {sharedCollections.items.length === 0 ? (
+            <ListItem disablePadding>
+              <Paper sx={{ border: 1, borderColor: "divider", color: "text.secondary", p: 2, width: "100%" }}>
+                No shared collections.
+              </Paper>
+            </ListItem>
+          ) : null}
         </List>
       ) : null}
       {sharedCollections.hasMore ? (

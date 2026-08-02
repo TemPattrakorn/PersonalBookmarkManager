@@ -1,4 +1,4 @@
-import { CircularProgress, Divider, List, ListItem, Stack, Typography } from "@mui/material";
+import { Alert, CircularProgress, Divider, List, ListItem, Paper, Stack } from "@mui/material";
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { LoadMoreButton } from "../../../components/LoadMoreButton";
@@ -45,9 +45,7 @@ export function BookmarksListPage() {
           <Divider sx={{ my: 4 }} />
         </>
       ) : null}
-      {sharedCollection ? (
-        <Typography sx={{ mt: 3 }}>Shared bookmarks are read-only.</Typography>
-      ) : null}
+      {sharedCollection ? <Alert severity="info" sx={{ mt: 3 }}>Shared bookmarks are read-only.</Alert> : null}
       <BookmarkFilters
         activeCollection={activeCollection}
         collections={bookmarks.collections}
@@ -69,7 +67,7 @@ export function BookmarksListPage() {
           <CircularProgress aria-label="Loading bookmarks" />
         </Stack>
       ) : bookmarks.loaded ? (
-        <List aria-label="Your bookmarks" sx={{ mt: 2 }}>
+        <List aria-label="Your bookmarks" disablePadding sx={{ mt: 2 }}>
           {bookmarks.items.map((bookmark) => (
             <BookmarkCard
               bookmark={bookmark}
@@ -78,7 +76,13 @@ export function BookmarksListPage() {
               onEdit={bookmark.access === "owner" ? setEditing : undefined}
             />
           ))}
-          {bookmarks.items.length === 0 ? <ListItem>Your bookmarks will appear here.</ListItem> : null}
+          {bookmarks.items.length === 0 ? (
+            <ListItem disablePadding>
+              <Paper sx={{ border: 1, borderColor: "divider", color: "text.secondary", p: 2, width: "100%" }}>
+                Your bookmarks will appear here.
+              </Paper>
+            </ListItem>
+          ) : null}
         </List>
       ) : null}
       {bookmarks.hasMore ? (

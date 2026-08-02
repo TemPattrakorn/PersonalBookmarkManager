@@ -21,7 +21,7 @@ export function CollectionDeleteDialog({ collection, deleting, onClose, onConfir
         <Button disabled={deleting} onClick={onClose}>
           Cancel
         </Button>
-        <Button color="error" disabled={deleting} onClick={onConfirm}>
+        <Button color="error" disabled={deleting} onClick={onConfirm} variant="contained">
           Delete collection
         </Button>
       </DialogActions>

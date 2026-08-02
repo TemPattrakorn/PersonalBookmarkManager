@@ -21,7 +21,7 @@ export function CollectionLeaveDialog({ collection, leaving, onClose, onConfirm 
         <Button disabled={leaving} onClick={onClose}>
           Cancel
         </Button>
-        <Button color="error" disabled={leaving} onClick={onConfirm}>
+        <Button color="error" disabled={leaving} onClick={onConfirm} variant="contained">
           Leave shared collection
         </Button>
       </DialogActions>
