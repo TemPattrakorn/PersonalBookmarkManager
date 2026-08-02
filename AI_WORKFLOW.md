@@ -1,8 +1,8 @@
 # AI workflow
 
-This is a factual working record through Phase 4.
+This is a factual working record through Phase 10 evidence preparation.
 
-## Tools and task decomposition
+## Tools, model, and method
 
 The work used Codex (GPT-5) for repository inspection, planning,
 implementation, and review. Shell tools were used read-only first: `rg` found
@@ -11,6 +11,8 @@ Node/npm/Prisma commands checked compatibility and behavior. File changes were
 made with patch-based edits. Official Prisma and React Router documentation
 was checked during planning for Prisma 7's generated-client/driver-adapter
 requirements and React Router 8's package exports.
+
+## Work decomposition
 
 Work was divided into approved phases. Phase 0 settled the authentication,
 privacy, deletion, update, persistence, pagination, validation, and sharing
@@ -31,6 +33,8 @@ owner-managed exact-email grants and grantee emails, plus a separate read-only
 shared-collection section with an idempotent leave action. The final structural
 refactor placed feature pages, presentation components, hooks, and API calls in
 their own frontend boundaries without adding dependencies.
+
+## Deliberate scope control
 
 Ponytail full mode was used to challenge unnecessary scaffolding. It led to a
 single root lockfile and lint configuration, native npm workspaces, no
@@ -119,7 +123,7 @@ enough to authorize safe edits because deletion, sharing, validation, and API
 semantics were unsettled. Converting it into explicit phases and presenting
 defaults for approval was more effective than guessing.
 
-## Review, checks, and cost awareness
+## Review and verification history
 
 The reusable `.agent/commands/verify.md` command was used before handoff. A
 clean root `npm ci` initially could not update Prisma's user cache within the
@@ -171,6 +175,26 @@ permission passed all 29 backend tests, all 13 frontend tests, and every other
 Node 22.22.0 check and build. The existing Vite chunk-size advisory remained
 non-failing.
 
+## Cost and token awareness
+
 Cost and token use were controlled by inspecting only relevant files, running
 independent checks in parallel, reusing npm workspace scripts, and avoiding
 generated-code review. No subagents were needed for these bounded phases.
+
+## Final evidence status
+
+The reusable `.agent/commands/verify.md` command guided the final review. On
+2026-08-02, `npm run check` under Node 22.22.0 passed Prisma validation and
+generation, lint, both workspace typechecks, 29 backend tests, 13 frontend
+tests, and both production builds. Vite retained its non-failing advisory for
+a JavaScript bundle over 500 kB; no unrelated code-splitting work was added.
+
+A browser smoke test loaded the protected `/collections` route and verified its
+redirect to the configured Auth0 login screen. The authenticated continuation
+was not attempted because no test-account credentials were supplied; no
+passwords, tokens, cookies, or user data were inspected. Existing local
+processes already occupied ports 3000 and 3001, so they were left untouched.
+The remaining original-plan acceptance work is the focused Phase 7
+interaction/accessibility gate, the exhaustive Phase 9 three-person security
+matrix, and this authenticated manual smoke test. These are recorded as
+pending rather than represented as completed evidence.

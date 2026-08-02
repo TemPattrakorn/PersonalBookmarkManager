@@ -152,3 +152,12 @@ an unlink or revoked-share count.
 If no collection with that ID belongs to the authenticated person, including
 when the ID belongs to someone else, the API returns the same `404 Not Found`
 response. This prevents callers from inferring another person's collection.
+
+## Automated evidence
+
+`backend/test/e2e/http.e2e.spec.ts` covers owner collection and bookmark CRUD,
+pagination, collection filtering, nested reads, uncategorized behavior,
+collection deletion/unlinking, invalid collection assignment, and exact generic
+`404` responses for outsiders and unauthorized mutations. The suite also
+exercises a share revoked between an accessible collection lookup and its
+bookmark query, so filtered and nested reads do not rely on stale authorization.

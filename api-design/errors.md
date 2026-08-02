@@ -110,7 +110,8 @@ Unexpected failures return only:
 
 Application logs must not contain access tokens, request bodies, emails,
 bookmark URLs or notes, database details, or other sensitive personal data.
-Future automated tests must compare the exact `404` response across missing,
-cross-user, filtered, nested, revoked-share, and mutation paths; compare the
-`401` response for common credential failures; verify that validation errors
-do not echo submitted values; and verify sanitized `500` and `503` responses.
+`backend/test/e2e/http.e2e.spec.ts` compares the exact `404` response across
+missing, cross-user, filtered, nested, revoked-share, and mutation paths; it
+also covers common `401`, malformed-request `400`, and sanitized `500` and
+`503` authentication failures. The filter unit test covers the normalized
+unsupported-media-type response.

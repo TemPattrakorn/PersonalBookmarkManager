@@ -5,13 +5,29 @@ Take-home exercise submission for a Full-Stack Developer role at Bangkok Bank
 
 ## Current status
 
-Phase 4 completes the private React/Vite client: Auth0 SPA login, callback,
-logout, protected routes, collection and bookmark CRUD, and the approved
-read-only collection-sharing UI. Owners can grant, list, and revoke exact-email
-shares; grantees see a separate read-only collection list and may leave a
-share. The backend remains authoritative for every ownership and sharing rule.
+The approved implementation is complete through the core backend, Auth0 SPA,
+private CRUD, and read-only collection-sharing UI. Owners can grant, list, and
+revoke exact-email shares; grantees see a separate read-only collection list
+and may leave a share. The backend remains authoritative for every ownership
+and sharing rule.
 
-## Prerequisites
+### Original-plan status
+
+The original-plan evidence has been reconciled as follows:
+
+- Phases 0–6 and 8 are implemented and covered by the repository gate.
+- Phase 7's frontend behavior is implemented, but its focused interaction and
+  accessibility acceptance checks remain to be added.
+- Phase 9 has targeted authorization and error-path coverage, but not the
+  requested exhaustive three-person security matrix audit.
+- Phase 10's documentation and automated gate are current. The manual
+  authenticated Auth0 smoke test is pending access to a test account; the
+  unauthenticated protected-route redirect to Auth0 was verified on
+  2026-08-02.
+
+## Local setup and run
+
+### Prerequisites
 
 - Node.js 22.22.0
 - npm 10.9.4
@@ -23,7 +39,7 @@ nvm install
 nvm use
 ```
 
-## Setup
+### Setup
 
 Install all backend and frontend workspace dependencies from the repository
 root:
@@ -42,7 +58,7 @@ npm run db:migrate
 
 Real `.env` files and SQLite databases are ignored by Git.
 
-## Run locally
+### Run locally
 
 Use two terminals from the repository root:
 
@@ -75,7 +91,7 @@ keeps data already loaded from the same source visible; changing a collection
 filter clears the previous filter's data while the new request is pending or
 failed. Bookmark Retry also reloads its collection metadata.
 
-## Verify
+## Verification
 
 Run the complete repository gate:
 
@@ -94,7 +110,7 @@ npm test
 npm run build
 ```
 
-### Viewing backend test results
+### Backend test results
 
 Jest prints test results directly in the terminal. Use verbose output for the
 backend suite:
@@ -109,17 +125,20 @@ To run one focused test file:
 npm test --workspace backend -- --runTestsByPath src/common/filters/api-exception.filter.spec.ts --verbose
 ```
 
-To select the multi-user sharing HTTP entry point:
+To run the multi-user HTTP suite:
 
 ```sh
 npm test --workspace backend -- --runTestsByPath test/e2e/http.e2e.spec.ts --verbose
 ```
 
-The E2E invocation currently may print only Node's experimental VM-modules
-warning without a Jest pass/fail summary. Treat that output as inconclusive;
-the focused unit-test command above confirms that the Jest reporter is working.
+### Automated evidence
 
 The HTTP tests run against an ephemeral local Auth0 stub and a temporary SQLite
 database initialized from the committed migration, so they need no live
 credentials. They seed owner, grantee, and outsider identities to verify the
 private-by-default and approved-share behavior.
+
+The Phase 10 repository gate on 2026-08-02 passed all 29 backend and 13
+frontend tests, in addition to Prisma validation/generation, lint, typechecks,
+and production builds. Vite reports a non-failing advisory that the production
+JavaScript bundle exceeds 500 kB.

@@ -3,6 +3,8 @@
 This file is the required entry point for the approved HTTP and authorization
 contract. The full design is split by concern:
 
+## Contract map
+
 - [Core API](api-design/core.md) covers authentication, persistence,
   pagination, collection visibility, and privacy enforcement.
 - [Resource API](api-design/resources.md) covers representations, collection
@@ -11,6 +13,8 @@ contract. The full design is split by concern:
   leave operations plus their acceptance scenarios.
 - [Error contract](api-design/errors.md) covers error envelopes, status codes,
   non-disclosure behavior, sanitization, and required evidence.
+
+## Contract governance
 
 These files together form the authoritative API contract. Changes to any of
 them require the same approval as changes to this index.
@@ -27,7 +31,7 @@ After approval, preserve contract behavior, update the index and
 cross-references atomically, and validate all local links. Any semantic change
 requires separate approval.
 
-## Agent proposals corrected during review
+## Review findings and corrections
 
 - The agent considered a backend-for-frontend Auth0 session. Review found that
   it added session and CSRF machinery without helping the approved public-SPA

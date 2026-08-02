@@ -104,5 +104,7 @@ Future automated tests must cover:
 - collection deletion revoking shares while preserving bookmarks as private,
   uncategorized owner data.
 
-These scenarios describe required future evidence; no runtime coverage exists
-until application code and tests are implemented.
+`backend/test/e2e/http.e2e.spec.ts` provides runtime evidence for the owner,
+grantee, and outsider flows, including idempotent grants and leaves, revocation,
+and non-disclosure across direct, filtered, and nested reads. The list above
+remains the contract for any additional acceptance coverage.

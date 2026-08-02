@@ -1,5 +1,7 @@
 # Decisions
 
+## Authentication
+
 ## 2026-07-29 — Use SPA-direct Auth0 authentication
 
 **Decision:** The React SPA will use Auth0's Authorization Code flow with
@@ -64,6 +66,8 @@ failure, serve a cached result at or after `exp`, share results between tokens,
 reject private use solely for an unverified email, or expose verification state
 without a new approved decision.
 
+## Resource lifecycle
+
 ## 2026-07-29 — Preserve bookmarks when deleting a collection
 
 **Decision:** Deleting an authenticated person's collection deletes only that
@@ -84,6 +88,8 @@ with the smallest behavior change.
 and unlinking as explicit alternatives rather than choosing a database default.
 The user selected unlinking; do not add deletion counts, sharing behavior, or
 bookmark deletion as part of collection deletion.
+
+## Sharing model
 
 ## 2026-07-30 — Use email-addressed read-only collection sharing
 
@@ -151,6 +157,8 @@ grantee-controlled leave action because it satisfies the under-specified
 requirement with less implementation effort and less testing than the other
 options. Do not add acceptance, decline history, blocking, or notification
 state without another approved decision.
+
+## Update and persistence contract
 
 ## 2026-07-31 — Use partial PATCH updates only
 
