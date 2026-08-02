@@ -81,6 +81,18 @@ describe("collection and bookmark HTTP contract", () => {
       "url",
     ]);
 
+    for (const path of [
+      "/bookmarks",
+      `/bookmarks?collectionId=${collection.id}`,
+      `/collections/${collection.id}/bookmarks`,
+    ]) {
+      const response = await requestAs(harness!, owner, path);
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual([
+        expect.objectContaining({ id: bookmark.id, access: "owner" }),
+      ]);
+    }
+
     const patchedBookmark = await requestAs(harness!, owner, `/bookmarks/${bookmark.id}`, {
       method: "PATCH",
       body: { notes: null, title: " Renamed bookmark " },
@@ -90,6 +102,39 @@ describe("collection and bookmark HTTP contract", () => {
       notes: null,
       title: "Renamed bookmark",
     });
+
+    const uncategorized = await requestAs(harness!, owner, "/bookmarks", {
+      method: "POST",
+      body: { title: "Uncategorized", url: "https://example.com/uncategorized" },
+    });
+    expect(uncategorized.status).toBe(201);
+    const uncategorizedBookmark = (await uncategorized.json()) as { id: string };
+    expect(uncategorizedBookmark).toMatchObject({ collectionId: null, access: "owner" });
+
+    const uncategorizedPatch = await requestAs(harness!, owner, `/bookmarks/${bookmark.id}`, {
+      method: "PATCH",
+      body: { collectionId: null },
+    });
+    expect(uncategorizedPatch.status).toBe(200);
+    await expect(uncategorizedPatch.json()).resolves.toMatchObject({ collectionId: null });
+
+    const recategorizedPatch = await requestAs(harness!, owner, `/bookmarks/${bookmark.id}`, {
+      method: "PATCH",
+      body: { collectionId: collection.id },
+    });
+    expect(recategorizedPatch.status).toBe(200);
+    await expect(recategorizedPatch.json()).resolves.toMatchObject({ collectionId: collection.id });
+
+    const deletedUncategorized = await requestAs(
+      harness!,
+      owner,
+      `/bookmarks/${uncategorizedBookmark.id}`,
+      { method: "DELETE" },
+    );
+    expect(deletedUncategorized.status).toBe(204);
+    await expectNotFound(
+      await requestAs(harness!, owner, `/bookmarks/${uncategorizedBookmark.id}`),
+    );
 
     const renamed = await requestAs(harness!, owner, `/collections/${collection.id}`, {
       method: "PATCH",
