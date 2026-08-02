@@ -207,7 +207,7 @@ An omitted or `null` bookmark collection on create makes it uncategorized.
 Create operations return `201`, reads and patches return `200`, and deletes
 return `204` without a body. Collection and bookmark responses include their
 UUID, editable fields, timestamps, and `access`, but never an owner or person
-identifier. `GET /me` returns only the authenticated person's verified email.
+identifier. `GET /me` returns only the authenticated person's Auth0 email.
 
 **Alternatives and tradeoffs:** Cursor pagination scales better during heavy
 concurrent writes but adds cursor and response metadata with no current need.
