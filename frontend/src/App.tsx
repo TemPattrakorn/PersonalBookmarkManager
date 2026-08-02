@@ -7,79 +7,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router";
-import { completeLogin, getAuthClient, signOut, startLogin } from "./auth";
-
-type SessionState = "loading" | "signed-in" | "signed-out" | "error";
-
-type AuthContextValue = {
-  completeCallback: () => Promise<void>;
-  login: () => Promise<void>;
-  logout: () => Promise<void>;
-  session: SessionState;
-};
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-function useAuth(): AuthContextValue {
-  const auth = useContext(AuthContext);
-  if (!auth) {
-    throw new Error("Authentication context is unavailable");
-  }
-  return auth;
-}
-
-function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<SessionState>("loading");
-
-  useEffect(() => {
-    let active = true;
-
-    void getAuthClient()
-      .then((client) => client.isAuthenticated())
-      .then((authenticated) => {
-        if (active) {
-          setSession(authenticated ? "signed-in" : "signed-out");
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setSession("error");
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const login = useCallback(async () => {
-    await startLogin();
-  }, []);
-
-  const logout = useCallback(async () => {
-    await signOut();
-  }, []);
-
-  const completeCallback = useCallback(async () => {
-    await completeLogin();
-    setSession("signed-in");
-  }, []);
-
-  return (
-    <AuthContext.Provider value={{ completeCallback, login, logout, session }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+import { AuthProvider, useAuth } from "./auth-context";
+import { BookmarksPage, CollectionsPage } from "./resource-pages";
 
 function Page({ children }: { children: React.ReactNode }) {
   return (
@@ -125,9 +56,8 @@ function SignInPrompt({ error = false }: { error?: boolean }) {
   );
 }
 
-function ProtectedPage({ title }: { title: string }) {
-  const { logout, session } = useAuth();
-  const [signingOut, setSigningOut] = useState(false);
+function ProtectedPage({ children }: { children: React.ReactNode }) {
+  const { session } = useAuth();
 
   if (session === "loading") {
     return (
@@ -148,26 +78,7 @@ function ProtectedPage({ title }: { title: string }) {
     return <SignInPrompt />;
   }
 
-  return (
-    <Page>
-      <Stack spacing={2} sx={{ alignItems: "flex-start", mt: 3 }}>
-        <Typography component="h2" variant="h5">
-          {title}
-        </Typography>
-        <Typography>Private resource management will be added next.</Typography>
-        <Button
-          disabled={signingOut}
-          onClick={() => {
-            setSigningOut(true);
-            void logout().catch(() => setSigningOut(false));
-          }}
-          variant="outlined"
-        >
-          Sign out
-        </Button>
-      </Stack>
-    </Page>
-  );
+  return children;
 }
 
 function CallbackPage() {
@@ -219,8 +130,22 @@ export function App() {
         <Routes>
           <Route element={<Navigate replace to="/collections" />} path="/" />
           <Route element={<CallbackPage />} path="/callback" />
-          <Route element={<ProtectedPage title="Collections" />} path="/collections" />
-          <Route element={<ProtectedPage title="Bookmarks" />} path="/bookmarks" />
+          <Route
+            element={
+              <ProtectedPage>
+                <CollectionsPage />
+              </ProtectedPage>
+            }
+            path="/collections"
+          />
+          <Route
+            element={
+              <ProtectedPage>
+                <BookmarksPage />
+              </ProtectedPage>
+            }
+            path="/bookmarks"
+          />
           <Route element={<Navigate replace to="/collections" />} path="*" />
         </Routes>
       </AuthProvider>
