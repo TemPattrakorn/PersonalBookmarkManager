@@ -1,5 +1,4 @@
 import {
-  Alert,
   Box,
   Button,
   CircularProgress,
@@ -19,22 +18,13 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { Link as RouterLink, useSearchParams } from "react-router";
-import { ApiError, apiRequest, type Bookmark, type Collection } from "./api";
+import { apiRequest, failureStatus } from "./api/client";
 import { useAuth } from "./auth-context";
-
-const PAGE_SIZE = 50;
-
-function failureMessage(status: number | undefined): string | undefined {
-  if (status === undefined) return undefined;
-  if (status === 400) return "Check your input and try again.";
-  if (status === 401) return "Please sign in again.";
-  if (status === 503) return "The service is unavailable. Please try again shortly.";
-  return "We couldn’t complete that request. Please try again.";
-}
-
-function failureStatus(error: unknown): number {
-  return error instanceof ApiError ? error.status : 500;
-}
+import { LoadMoreButton } from "./components/LoadMoreButton";
+import { RequestFailure } from "./components/RequestFailure";
+import type { Bookmark } from "./features/bookmarks/types";
+import type { Collection } from "./features/collections/types";
+import { PAGE_SIZE, usePagedList } from "./hooks/usePagedList";
 
 function Workspace({ children, title }: { children: React.ReactNode; title: string }) {
   const { logout } = useAuth();
@@ -84,80 +74,6 @@ function Workspace({ children, title }: { children: React.ReactNode; title: stri
       ) : null}
       {children}
     </Box>
-  );
-}
-
-function usePagedList<T>(loadPage: (offset: number) => Promise<T[]>) {
-  const { requireLogin } = useAuth();
-  const [items, setItems] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [status, setStatus] = useState<number>();
-  const [reloadToken, setReloadToken] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setStatus(undefined);
-
-    void loadPage(0)
-      .then((page) => {
-        if (active) {
-          setItems(page);
-          setHasMore(page.length === PAGE_SIZE);
-        }
-      })
-      .catch((error: unknown) => {
-        if (active) {
-          const nextStatus = failureStatus(error);
-          setStatus(nextStatus);
-          if (nextStatus === 401) requireLogin();
-        }
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [loadPage, reloadToken, requireLogin]);
-
-  const reload = useCallback(() => setReloadToken((value) => value + 1), []);
-  const loadMore = useCallback(async () => {
-    setLoadingMore(true);
-    setStatus(undefined);
-    try {
-      const page = await loadPage(items.length);
-      setItems((current) => [...current, ...page]);
-      setHasMore(page.length === PAGE_SIZE);
-    } catch (error) {
-      const nextStatus = failureStatus(error);
-      setStatus(nextStatus);
-      if (nextStatus === 401) requireLogin();
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [items.length, loadPage, requireLogin]);
-
-  return { hasMore, items, loadMore, loading, loadingMore, reload, status, setStatus };
-}
-
-function RequestFailure({ status }: { status: number | undefined }) {
-  const message = failureMessage(status);
-  return message ? (
-    <Alert severity={status === 400 ? "warning" : "error"} sx={{ mt: 2 }}>
-      {message}
-    </Alert>
-  ) : null;
-}
-
-function LoadMore({ disabled, onClick }: { disabled: boolean; onClick: () => void }) {
-  return (
-    <Button disabled={disabled} onClick={onClick} sx={{ mt: 2 }} variant="outlined">
-      {disabled ? "Loading…" : "Load more"}
-    </Button>
   );
 }
 
@@ -287,7 +203,7 @@ export function CollectionsPage() {
           {items.length === 0 ? <ListItem>Your collections will appear here.</ListItem> : null}
         </List>
       )}
-      {hasMore ? <LoadMore disabled={loadingMore} onClick={() => void loadMore()} /> : null}
+      {hasMore ? <LoadMoreButton disabled={loadingMore} onClick={() => void loadMore()} /> : null}
       <Dialog onClose={() => setDeleting(undefined)} open={deleting !== undefined}>
         <DialogTitle>Delete collection?</DialogTitle>
         <DialogContent>
@@ -524,7 +440,7 @@ export function BookmarksPage() {
           {items.length === 0 ? <ListItem>Your bookmarks will appear here.</ListItem> : null}
         </List>
       )}
-      {hasMore ? <LoadMore disabled={loadingMore} onClick={() => void loadMore()} /> : null}
+      {hasMore ? <LoadMoreButton disabled={loadingMore} onClick={() => void loadMore()} /> : null}
       <Dialog onClose={() => setDeleting(undefined)} open={deleting !== undefined}>
         <DialogTitle>Delete bookmark?</DialogTitle>
         <DialogContent>
