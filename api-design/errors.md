@@ -38,15 +38,17 @@ The API uses these status codes:
   parameters, invalid body fields, an empty `PATCH`, unknown or read-only
   fields, and self-sharing;
 - `401 Unauthorized` for a missing, malformed, expired, incorrectly issued,
-  or otherwise invalid access token;
+  or otherwise invalid access token, an Auth0 `/userinfo` client `4xx` other
+  than `429`, a subject mismatch, or missing usable identity claims;
 - `404 Not Found` for a missing resource and every privacy-sensitive
   authorization or lookup failure;
 - `415 Unsupported Media Type` when a route that accepts a body receives
   content that is not JSON;
 - `500 Internal Server Error` for an unexpected application or database
   failure; and
-- `503 Service Unavailable` when Auth0 discovery, JWKS, or `/userinfo` is
-  temporarily unavailable rather than rejecting the supplied credentials.
+- `503 Service Unavailable` when Auth0 discovery, JWKS, or `/userinfo` has a
+  transport failure, timeout, rate limit, upstream `5xx`, or malformed
+  response rather than rejecting the supplied credentials.
 
 The API does not use `403 Forbidden` because it would distinguish an existing
 but inaccessible resource. It does not use `409 Conflict` for repeat sharing,
@@ -86,7 +88,8 @@ All rejected credentials return `401` with `WWW-Authenticate: Bearer` and:
 ```
 
 The response does not distinguish missing, expired, malformed, wrong-audience,
-or wrong-issuer tokens. An identified Auth0 transport or upstream `5xx`
+wrong-issuer, subject-mismatch, or unusable-profile credentials. An identified
+Auth0 transport, timeout, rate-limit, upstream `5xx`, or malformed-response
 failure returns the sanitized `503` response instead:
 
 ```json

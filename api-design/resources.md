@@ -4,7 +4,8 @@
 
 ## Resource representations
 
-`GET /me` returns `200 OK` with only the current person's verified email:
+`GET /me` returns `200 OK` with only the current person's Auth0 email. It does
+not expose verification state:
 
 ```json
 {

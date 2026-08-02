@@ -24,6 +24,32 @@ SPA-direct plan from the initially considered BFF design. The user chose the
 original SPA-direct plan; do not introduce BFF/session infrastructure unless a
 later approved decision replaces this one.
 
+## 2026-08-02 — Synchronize Auth0 identity on every request
+
+**Decision:** Every authenticated API request verifies the Auth0 access token,
+loads `sub`, `email`, and `email_verified` from `/userinfo`, requires the two
+subjects to match, and upserts the local person by Auth0 subject. A person with
+an unverified email may use private features but remains ineligible as a share
+recipient. The API does not link accounts by email or expose verification state
+through `GET /me`.
+
+Credential and unusable-profile failures return the same sanitized `401`.
+Auth0 discovery, JWKS, or `/userinfo` transport failures, timeouts, rate
+limits, upstream `5xx` responses, and malformed upstream data return the same
+sanitized `503`.
+
+**Alternatives and tradeoffs:** Rejecting unverified people entirely would
+make email verification a prerequisite for private bookmark use. Synchronizing
+only on first sign-in would avoid repeated `/userinfo` calls but leave email and
+verification state stale. A short-lived cache would reduce Auth0 traffic but
+add expiry and invalidation behavior that the current scope does not need.
+
+**User opinion and agent direction:** The user approved private access for
+unverified people, synchronization on every request, and distinct credential
+versus provider-outage responses. Do not cache `/userinfo`, reject private use
+solely for an unverified email, or expose verification state without a new
+approved decision.
+
 ## 2026-07-29 — Preserve bookmarks when deleting a collection
 
 **Decision:** Deleting an authenticated person's collection deletes only that

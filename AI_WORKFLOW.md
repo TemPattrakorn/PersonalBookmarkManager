@@ -1,7 +1,7 @@
 # AI workflow
 
-This is a factual working record through Phase 1. It will be refined as later
-phases add authenticated behavior and security evidence.
+This is a factual working record through Phase 2. It will be refined as later
+phases add resource authorization and sharing evidence.
 
 ## Tools and task decomposition
 
@@ -18,13 +18,18 @@ privacy, deletion, update, persistence, pagination, validation, and sharing
 contracts before runtime code existed. Phase 1 then stayed deliberately
 smaller: npm workspace tooling, a Nest/Prisma foundation, the complete initial
 schema and migration, a React/Router/MUI shell, smoke tests, documentation, and
-one reusable verification command. Auth0, API routes, resource UI, seed users,
-and behavioral sharing tests remain deferred until there is behavior to test.
+one reusable verification command. Phase 2 added the first authenticated
+vertical slice: global token verification, Auth0 profile synchronization,
+local-person upsert, `GET /me`, normalized failures, and HTTP-level security
+tests. Resource routes, frontend authentication, seed users, resource UI, and
+sharing tests remain deferred.
 
 Ponytail full mode was used to challenge unnecessary scaffolding. It led to a
 single root lockfile and lint configuration, native npm workspaces, no
 concurrent-process package, Node's native `.env` loading, one Prisma provider,
-and server-rendered frontend testing without jsdom or Testing Library.
+server-rendered frontend testing without jsdom or Testing Library, and a Phase
+2 authentication path using one JWT dependency plus native `fetch` rather than
+a repository layer or HTTP client.
 
 ## What worked
 
@@ -35,9 +40,10 @@ and server-rendered frontend testing without jsdom or Testing Library.
 2. Root workspace scripts provide one repeatable gate across Prisma, backend,
    and frontend work. Prisma client generation runs during install and backend
    builds, so generated code does not need to be tracked.
-3. Small smoke tests caught integration issues without inventing Phase 2
-   behavior: Nest resolves the Prisma provider, and React server-renders a
-   semantic `main` and heading while MUI is active.
+3. The Phase 2 HTTP suite uses local Auth0 discovery, JWKS, and `/userinfo`
+   endpoints with generated RS256 tokens. It reproduces credential, profile,
+   timeout, upstream, persistence, and exact-response behavior without live
+   Auth0 credentials.
 
 ## Failures and recoveries
 
@@ -51,18 +57,20 @@ and server-rendered frontend testing without jsdom or Testing Library.
    an absent SQLite file. Schema validation and migration diff proved the model
    was valid. A small standard-library preflight now creates only the configured
    SQLite file; Prisma still generates, applies, and records every migration.
-3. Verification exposed environment assumptions: Prisma Client's runtime proxy
-   made an `instanceof` smoke assertion unreliable, the preflight initially
-   relied on implicit Node lint globals, and npm child scripts found system
-   Node 20 until the required Node 22 bin directory was placed first on `PATH`.
-   The test now checks Prisma's stable `$disconnect` capability, native globals
-   are imported explicitly, and the final gate ran under Node 22.22.0.
+3. Phase 2 verification exposed two integration assumptions. TypeScript first
+   identified the missing Express request declarations, so the exact
+   `@types/express` development package was added. Jest then tried to parse
+   `jose` 6's ESM directly despite Node 22 supporting it from CommonJS. Native
+   dynamic import plus Jest's VM-module flag preserved both the current `jose`
+   release and the CommonJS application build. The sandbox initially blocked
+   the test servers' local ports; the same tests passed with approved
+   localhost-listen permission.
 
 ## Prompt quality
 
-The effective prompt was the approved Phase 1 plan: it named exact versions,
-boundaries, artifacts, and checks. That made implementation decisions
-testable and kept authentication and feature work out of the foundation.
+The effective prompts were the approved phase plans: they named exact
+versions, boundaries, artifacts, security behavior, and checks. Phase 2's
+explicit 401/503 matrix made credential and outage behavior directly testable.
 
 The initial broad request to start building from `AGENTS.md` was not precise
 enough to authorize safe edits because deletion, sharing, validation, and API
@@ -86,6 +94,13 @@ origin, and Vite served the shell on port 3000. Both processes were stopped
 afterward. The final diff and ignored-artifact review is reported in the
 handoff.
 
+Phase 2 focused verification ran under Node 22.22.0. Backend typechecking and
+all 17 backend tests passed; the HTTP tests required approved localhost-listen
+permission. The final root `npm run check` then passed Prisma validation and
+generation, lint, both workspace typechecks, all 18 tests, and both production
+builds. The final diff and ignored-artifact inspection is reported in the
+Phase 2 handoff.
+
 Cost and token use were controlled by inspecting only relevant files, running
 independent checks in parallel, reusing npm workspace scripts, and avoiding
-generated-code review. No subagents were needed for this bounded foundation.
+generated-code review. No subagents were needed for these bounded phases.

@@ -10,10 +10,17 @@ request data as authority.
 
 The API obtains `email` and `email_verified` from Auth0 `/userinfo`, verifies
 that the returned `sub` matches the access-token principal, and stores the
-profile on the local person. Email matching trims surrounding whitespace and
-compares lowercase values without provider-specific rewriting. Email is only
-a share-recipient lookup key: authorization is stored against the stable local
-person ID, and accounts are never linked by email.
+profile on the local person on every authenticated request. Email matching
+trims surrounding whitespace and compares lowercase values without
+provider-specific rewriting. Email is only a share-recipient lookup key:
+authorization is stored against the stable local person ID, and accounts are
+never linked by email.
+
+A person whose Auth0 email is unverified may use private application features.
+Verification state affects only eligibility as a share recipient. The API does
+not separately enforce the token's `scope` claim; the SPA requests `openid
+profile email`, and a token that cannot provide the required `/userinfo`
+identity is rejected with the standard authentication response.
 
 Only a verified email matching exactly one previously signed-in local person
 is eligible for sharing. Zero, multiple, or unverified matches all use the
