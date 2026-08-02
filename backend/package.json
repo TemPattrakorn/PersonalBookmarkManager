@@ -9,7 +9,7 @@
     "db:migrate": "node scripts/ensure-sqlite-database.mjs && prisma migrate dev",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-vm-modules ../node_modules/jest/bin/jest.js --runInBand",
-    "build": "prisma generate && nest build"
+    "build": "prisma generate && nest build -p tsconfig.build.json"
   },
   "dependencies": {
     "@nestjs/common": "11.1.28",
