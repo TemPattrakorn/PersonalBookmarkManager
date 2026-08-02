@@ -11,20 +11,6 @@ revoke exact-email shares; grantees see a separate read-only collection list
 and may leave a share. The backend remains authoritative for every ownership
 and sharing rule.
 
-### Original-plan status
-
-The original-plan evidence has been reconciled as follows:
-
-- Phases 0–6 and 8 are implemented and covered by the repository gate.
-- Phase 7's frontend behavior is implemented, but its focused interaction and
-  accessibility acceptance checks remain to be added.
-- Phase 9 has targeted authorization and error-path coverage, but not the
-  requested exhaustive three-person security matrix audit.
-- Phase 10's documentation and automated gate are current. The manual
-  authenticated Auth0 smoke test is pending access to a test account; the
-  unauthenticated protected-route redirect to Auth0 was verified on
-  2026-08-02.
-
 ## Local setup and run
 
 ### Prerequisites
