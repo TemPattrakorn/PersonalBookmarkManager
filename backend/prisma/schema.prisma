@@ -1,0 +1,66 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Person {
+  id              String            @id @default(uuid())
+  auth0Subject    String            @unique
+  email           String
+  normalizedEmail String
+  emailVerified   Boolean
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  collections     Collection[]      @relation("CollectionOwner")
+  bookmarks       Bookmark[]        @relation("BookmarkOwner")
+  sharesReceived  CollectionShare[] @relation("ShareGrantee")
+
+  @@index([normalizedEmail, emailVerified])
+}
+
+model Collection {
+  id        String            @id @default(uuid())
+  name      String
+  ownerId   String
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  owner     Person            @relation("CollectionOwner", fields: [ownerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  bookmarks Bookmark[]
+  shares    CollectionShare[]
+
+  @@index([ownerId, createdAt(sort: Desc), id(sort: Desc)])
+}
+
+model Bookmark {
+  id           String      @id @default(uuid())
+  url          String
+  title        String
+  notes        String?
+  collectionId String?
+  ownerId      String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  owner        Person      @relation("BookmarkOwner", fields: [ownerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([ownerId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([collectionId, createdAt(sort: Desc), id(sort: Desc)])
+}
+
+model CollectionShare {
+  id              String     @id @default(uuid())
+  collectionId    String
+  granteePersonId String
+  createdAt       DateTime   @default(now())
+  collection      Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  grantee          Person     @relation("ShareGrantee", fields: [granteePersonId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([collectionId, granteePersonId])
+  @@index([granteePersonId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([collectionId, createdAt(sort: Desc), id(sort: Desc)])
+}

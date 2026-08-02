@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.vite/
+
+.env
+.env.*
+!.env.example
+
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+backend/src/generated/
+.DS_Store
