@@ -1,15 +1,15 @@
 import {
   expectNotFound,
   expectValidationFailure,
-} from "./auth.test-assertions";
+} from "../../src/auth.test-assertions";
 import {
   closeResourceHarness,
   requestAs,
   startResourceHarness,
   type Actor,
   type ResourceHarness,
-} from "./resource.test-harness";
-import { createAuthTestKeys, signTestToken, type AuthTestKeys } from "./auth.test-tokens";
+} from "../../src/resource.test-harness";
+import { createAuthTestKeys, signTestToken, type AuthTestKeys } from "../../src/auth.test-tokens";
 
 describe("collection sharing HTTP contract", () => {
   let keys: AuthTestKeys;

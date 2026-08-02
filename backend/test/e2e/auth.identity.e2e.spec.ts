@@ -1,19 +1,19 @@
 import {
   expectAuthenticationRequired,
-} from "./auth.test-assertions";
+} from "../../src/auth.test-assertions";
 import {
   closeAuthHarness,
   request,
   startAuthHarness,
   type AuthHarness,
-} from "./auth.test-harness";
+} from "../../src/auth.test-harness";
 import {
   createAuthTestKeys,
   signTestToken,
   signUntrustedToken,
   signWrongAlgorithmToken,
   type AuthTestKeys,
-} from "./auth.test-tokens";
+} from "../../src/auth.test-tokens";
 
 describe("authenticated identity HTTP contract", () => {
   let keys: AuthTestKeys;

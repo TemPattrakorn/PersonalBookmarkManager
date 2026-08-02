@@ -40,13 +40,16 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
-    "testRegex": "(api-exception\\.filter|app\\.module|http\\.e2e)\\.spec\\.ts$",
+    "rootDir": ".",
+    "testMatch": [
+      "<rootDir>/src/**/*.spec.ts",
+      "<rootDir>/test/e2e/http.e2e.spec.ts"
+    ],
     "transform": {
       "^.+\\.ts$": [
         "ts-jest",
         {
-          "tsconfig": "<rootDir>/../tsconfig.json"
+          "tsconfig": "<rootDir>/tsconfig.json"
         }
       ]
     },
