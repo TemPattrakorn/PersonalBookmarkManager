@@ -88,6 +88,31 @@ npm test
 npm run build
 ```
 
+### Viewing backend test results
+
+Jest prints test results directly in the terminal. Use verbose output for the
+backend suite:
+
+```sh
+npm test --workspace backend -- --verbose
+```
+
+To run one focused test file:
+
+```sh
+npm test --workspace backend -- --runTestsByPath src/api-exception.filter.spec.ts --verbose
+```
+
+To select the multi-user sharing HTTP entry point:
+
+```sh
+npm test --workspace backend -- --runTestsByPath test/e2e/http.e2e.spec.ts --verbose
+```
+
+The E2E invocation currently may print only Node's experimental VM-modules
+warning without a Jest pass/fail summary. Treat that output as inconclusive;
+the focused unit-test command above confirms that the Jest reporter is working.
+
 The HTTP tests run against an ephemeral local Auth0 stub and a temporary SQLite
 database initialized from the committed migration, so they need no live
 credentials. They seed owner, grantee, and outsider identities to verify the
