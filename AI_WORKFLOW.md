@@ -98,6 +98,13 @@ a repository layer or HTTP client.
    left lifecycle subprocesses on the shell's Node 24, reproducing the known
    real-Prisma harness `500`; explicitly selecting Node 22 for the whole gate
    passed without changing persistence or authorization behavior.
+7. Live use showed that sharing only the active authentication promise was
+   insufficient: after it settled, every reload again depended on `/userinfo`
+   and the person upsert, so several manual retries could still be needed. The
+   follow-up reuses only a successful result for the exact token and only until
+   its verified expiry. Failed attempts remain uncached, different tokens stay
+   isolated, and a focused expiry check proves an expired cached identity
+   cannot authenticate.
 
 ## Prompt quality
 
@@ -156,6 +163,13 @@ gate passed Prisma validation and generation, lint, both workspace typechecks,
 all 27 backend tests, all 13 frontend tests, and both production builds. The
 existing Vite chunk-size advisory remains non-failing; code splitting was not
 added because it is unrelated to this fix.
+
+The successful-token cache added one focused expiry check and extended the
+success/failure concurrency checks. The first sandboxed gate could not open
+the E2E harness's localhost ports; rerunning the same gate with that required
+permission passed all 29 backend tests, all 13 frontend tests, and every other
+Node 22.22.0 check and build. The existing Vite chunk-size advisory remained
+non-failing.
 
 Cost and token use were controlled by inspecting only relevant files, running
 independent checks in parallel, reusing npm workspace scripts, and avoiding

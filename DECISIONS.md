@@ -24,37 +24,43 @@ SPA-direct plan from the initially considered BFF design. The user chose the
 original SPA-direct plan; do not introduce BFF/session infrastructure unless a
 later approved decision replaces this one.
 
-## 2026-08-02 — Synchronize Auth0 identity on every request
+## 2026-08-02 — Cache successful Auth0 synchronization per access token
 
-**Decision:** Every authenticated API request verifies the Auth0 access token,
-loads `sub`, `email`, and `email_verified` from `/userinfo`, requires the two
-subjects to match, and upserts the local person by Auth0 subject. A person with
-an unverified email may use private features but remains ineligible as a share
-recipient. The API does not link accounts by email or expose verification state
-through `GET /me`.
+**Decision:** The first authenticated API request for an exact Auth0 access
+token verifies it, loads `sub`, `email`, and `email_verified` from `/userinfo`,
+requires the two subjects to match, and upserts the local person by Auth0
+subject. Concurrent requests with that token share the active work. After
+success, later requests with the exact token reuse the synchronized person only
+until the token's verified `exp`; an expired token is never served from the
+cache. Failures are removed immediately and are never cached. Different tokens
+never share authentication work or results.
+
+A person with an unverified email may use private features but remains
+ineligible as a share recipient. The API does not link accounts by email or
+expose verification state through `GET /me`. Profile changes become visible
+when Auth0 issues a different access token rather than on every API request.
 
 Credential and unusable-profile failures return the same sanitized `401`.
 Auth0 discovery, JWKS, or `/userinfo` transport failures, timeouts, rate
 limits, upstream `5xx` responses, and malformed upstream data return the same
 sanitized `503`.
 
-Concurrent requests carrying the same authorization header may share only the
-currently active `/userinfo` synchronization and Prisma upsert. The in-memory
-coordination key is a SHA-256 digest of the header and is removed after success
-or failure. Once that promise settles, a later request performs a fresh
-synchronization; there is no TTL or completed identity cache.
+The in-memory coordination and cache key is a SHA-256 digest of the
+authorization header; raw tokens are neither stored as keys nor logged.
 
 **Alternatives and tradeoffs:** Rejecting unverified people entirely would
 make email verification a prerequisite for private bookmark use. Synchronizing
-only on first sign-in would avoid repeated `/userinfo` calls but leave email and
-verification state stale. A short-lived cache would reduce Auth0 traffic but
-add expiry and invalidation behavior that the current scope does not need.
-Sharing only an active attempt removes duplicate concurrent provider and
-database work without making sequential profile data stale.
+on every request kept profile data freshest, but made each page reload depend
+again on Auth0 and Prisma; active-promise sharing alone still exposed every
+later request batch to that failure. A fixed-duration cache adds an arbitrary
+freshness interval. Binding reuse to the already verified token lifetime gives
+the cache a security-relevant expiry without adding configuration, at the cost
+of profile data remaining unchanged for that token's lifetime.
 
-**User opinion and agent direction:** The user approved private access for
-unverified people, synchronization on every request, and distinct credential
-versus provider-outage responses. Do not retain completed `/userinfo` results,
+**User opinion and agent direction:** After live retries showed that
+active-promise sharing did not make sequential reloads reliable, the user
+approved successful-result reuse for the exact verified token. Do not cache a
+failure, serve a cached result at or after `exp`, share results between tokens,
 reject private use solely for an unverified email, or expose verification state
 without a new approved decision.
 

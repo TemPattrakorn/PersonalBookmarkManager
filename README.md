@@ -63,6 +63,12 @@ with Authorization Code flow and PKCE. The documented collection, bookmark,
 and share routes are available. No Auth0 client secret or test password is
 committed or required in frontend configuration.
 
+The backend shares concurrent identity synchronization and reuses only a
+successful result for the exact access token until its verified expiry. It
+never caches authentication failures or serves an expired token, so parallel
+page loads do not repeat `/userinfo` and person upserts while authorization and
+tenant isolation remain server-side.
+
 If an initial collection, bookmark, or share-list request fails, the UI shows
 an explicit Retry action instead of an empty-list message. A failed refresh
 keeps data already loaded from the same source visible; changing a collection

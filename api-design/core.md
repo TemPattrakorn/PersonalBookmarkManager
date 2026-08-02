@@ -8,19 +8,22 @@ Every route requires a verified Auth0 access token. The API derives the current
 person from the verified `sub`; it never accepts a person or owner ID from
 request data as authority.
 
-The API obtains `email` and `email_verified` from Auth0 `/userinfo`, verifies
-that the returned `sub` matches the access-token principal, and stores the
-profile on the local person on every authenticated request. Email matching
-trims surrounding whitespace and compares lowercase values without
-provider-specific rewriting. Email is only a share-recipient lookup key:
-authorization is stored against the stable local person ID, and accounts are
-never linked by email.
+For the first request carrying an exact access token, the API obtains `email`
+and `email_verified` from Auth0 `/userinfo`, verifies that the returned `sub`
+matches the access-token principal, and stores the profile on the local person.
+Concurrent requests with that token await the same active identity
+synchronization and local-person upsert. After success, later requests reuse
+that synchronized person only until the token's verified `exp`. At or after
+expiry the cached result is discarded and cannot authenticate the request.
+Failures are discarded immediately, and different tokens never share work or
+results.
 
-Concurrent requests with the same bearer token may await one active identity
-synchronization and local-person upsert. The coordination key is a SHA-256
-digest of the authorization header and is discarded after success or failure.
-No completed result is cached: the next sequential request repeats token
-verification, `/userinfo`, and the upsert.
+The coordination and cache key is a SHA-256 digest of the authorization header;
+the raw token is not retained as a key. Email matching trims surrounding
+whitespace and compares lowercase values without provider-specific rewriting.
+Email is only a share-recipient lookup key: authorization is stored against the
+stable local person ID, and accounts are never linked by email. Profile changes
+are synchronized when Auth0 issues a different access token.
 
 A person whose Auth0 email is unverified may use private application features.
 Verification state affects only eligibility as a share recipient. The API does
