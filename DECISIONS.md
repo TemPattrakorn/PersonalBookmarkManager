@@ -38,17 +38,25 @@ Auth0 discovery, JWKS, or `/userinfo` transport failures, timeouts, rate
 limits, upstream `5xx` responses, and malformed upstream data return the same
 sanitized `503`.
 
+Concurrent requests carrying the same authorization header may share only the
+currently active `/userinfo` synchronization and Prisma upsert. The in-memory
+coordination key is a SHA-256 digest of the header and is removed after success
+or failure. Once that promise settles, a later request performs a fresh
+synchronization; there is no TTL or completed identity cache.
+
 **Alternatives and tradeoffs:** Rejecting unverified people entirely would
 make email verification a prerequisite for private bookmark use. Synchronizing
 only on first sign-in would avoid repeated `/userinfo` calls but leave email and
 verification state stale. A short-lived cache would reduce Auth0 traffic but
 add expiry and invalidation behavior that the current scope does not need.
+Sharing only an active attempt removes duplicate concurrent provider and
+database work without making sequential profile data stale.
 
 **User opinion and agent direction:** The user approved private access for
 unverified people, synchronization on every request, and distinct credential
-versus provider-outage responses. Do not cache `/userinfo`, reject private use
-solely for an unverified email, or expose verification state without a new
-approved decision.
+versus provider-outage responses. Do not retain completed `/userinfo` results,
+reject private use solely for an unverified email, or expose verification state
+without a new approved decision.
 
 ## 2026-07-29 — Preserve bookmarks when deleting a collection
 

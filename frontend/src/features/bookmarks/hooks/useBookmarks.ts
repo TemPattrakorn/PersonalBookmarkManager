@@ -19,11 +19,13 @@ export function useBookmarks(collectionFilter?: string) {
   const [activeCollection, setActiveCollection] = useState<Collection>();
   const [activeCollectionLoading, setActiveCollectionLoading] = useState(Boolean(collectionFilter));
   const [activeCollectionStatus, setActiveCollectionStatus] = useState<number>();
+  const [metadataReloadToken, setMetadataReloadToken] = useState(0);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let active = true;
+    setCollectionsStatus(undefined);
     void listCollections(0, 100)
       .then((page) => {
         if (active) setCollections(page);
@@ -38,7 +40,7 @@ export function useBookmarks(collectionFilter?: string) {
     return () => {
       active = false;
     };
-  }, [requireLogin]);
+  }, [metadataReloadToken, requireLogin]);
 
   useEffect(() => {
     let active = true;
@@ -72,13 +74,18 @@ export function useBookmarks(collectionFilter?: string) {
     return () => {
       active = false;
     };
-  }, [collectionFilter, requireLogin]);
+  }, [collectionFilter, metadataReloadToken, requireLogin]);
 
   const loadPage = useCallback(
     (offset: number) => listBookmarks(offset, collectionFilter, PAGE_SIZE),
     [collectionFilter],
   );
   const paged = usePagedList(loadPage);
+  const reload = paged.reload;
+  const retry = useCallback(() => {
+    setMetadataReloadToken((value) => value + 1);
+    reload();
+  }, [reload]);
 
   const save = useCallback(
     async (editing: Bookmark | undefined, input: BookmarkInput) => {
@@ -130,6 +137,7 @@ export function useBookmarks(collectionFilter?: string) {
     collectionsStatus,
     deleting,
     remove,
+    retry,
     save,
     saving,
   };

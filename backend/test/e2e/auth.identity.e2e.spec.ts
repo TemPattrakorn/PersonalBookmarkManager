@@ -64,6 +64,53 @@ describe("authenticated identity HTTP contract", () => {
     });
   });
 
+  it("coalesces concurrent requests with the same token, then synchronizes again", async () => {
+    harness = await startAuthHarness(keys.publicJwk);
+    harness.state.userinfo.delayMs = 30;
+    const token = await signTestToken(keys.privateKey, harness.issuer);
+
+    const responses = await Promise.all(
+      Array.from({ length: 4 }, () => request(harness!.baseUrl, "/me", `Bearer ${token}`)),
+    );
+
+    expect(responses.map(({ status }) => status)).toEqual([200, 200, 200, 200]);
+    expect(harness.state.userinfoCalls).toBe(1);
+    expect(harness.upsert).toHaveBeenCalledTimes(1);
+
+    harness.state.userinfo = {
+      body: {
+        sub: "auth0|owner",
+        email: "updated@example.com",
+        email_verified: false,
+      },
+    };
+    const next = await request(harness.baseUrl, "/me", `Bearer ${token}`);
+
+    expect(next.status).toBe(200);
+    await expect(next.json()).resolves.toEqual({ email: "updated@example.com" });
+    expect(harness.state.userinfoCalls).toBe(2);
+    expect(harness.upsert).toHaveBeenCalledTimes(2);
+  });
+
+  it("never shares authentication work between different tokens", async () => {
+    harness = await startAuthHarness(keys.publicJwk);
+    harness.state.userinfo.delayMs = 30;
+    const firstToken = await signTestToken(keys.privateKey, harness.issuer);
+    const secondToken = await signTestToken(keys.privateKey, harness.issuer, {
+      expirationTime: "10m",
+    });
+
+    const responses = await Promise.all([
+      request(harness.baseUrl, "/me", `Bearer ${firstToken}`),
+      request(harness.baseUrl, "/me", `Bearer ${secondToken}`),
+    ]);
+
+    expect(firstToken).not.toBe(secondToken);
+    expect(responses.map(({ status }) => status)).toEqual([200, 200]);
+    expect(harness.state.userinfoCalls).toBe(2);
+    expect(harness.upsert).toHaveBeenCalledTimes(2);
+  });
+
   it("keeps different subjects separate even when their normalized emails match", async () => {
     harness = await startAuthHarness(keys.publicJwk);
     const ownerToken = await signTestToken(keys.privateKey, harness.issuer);

@@ -88,6 +88,16 @@ a repository layer or HTTP client.
    passed, identifying the runtime mismatch rather than an application defect.
    The final verification explicitly selected the repository's required Node
    version; no backend behavior was changed to mask the failure.
+6. Manual Phase 4 testing exposed a real concurrency and presentation problem:
+   parallel same-token resource requests repeated `/userinfo` and person
+   upserts, while a failed first list load rendered the same empty state as a
+   successful empty response. The repair shares only an active same-header
+   identity synchronization, removes it on either outcome, and records whether
+   each frontend data source has loaded successfully so failures remain visible
+   and retryable. An early verification invocation started npm with Node 22 but
+   left lifecycle subprocesses on the shell's Node 24, reproducing the known
+   real-Prisma harness `500`; explicitly selecting Node 22 for the whole gate
+   passed without changing persistence or authorization behavior.
 
 ## Prompt quality
 
@@ -139,6 +149,13 @@ tests, all 9 frontend tests, and both production builds passed. The frontend
 build retains Vite's advisory warning for a chunk above 500 kB; no code-splitting
 was added because it is outside the approved functional scope. The final diff
 and ignored-artifact inspection is reported in the Phase 4 handoff.
+
+The authentication/list recovery work added four focused backend concurrency
+checks and four frontend recovery checks. Under Node 22.22.0, the final root
+gate passed Prisma validation and generation, lint, both workspace typechecks,
+all 27 backend tests, all 13 frontend tests, and both production builds. The
+existing Vite chunk-size advisory remains non-failing; code splitting was not
+added because it is unrelated to this fix.
 
 Cost and token use were controlled by inspecting only relevant files, running
 independent checks in parallel, reusing npm workspace scripts, and avoiding

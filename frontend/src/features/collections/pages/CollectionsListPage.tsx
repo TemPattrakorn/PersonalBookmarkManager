@@ -31,12 +31,15 @@ export function CollectionsListPage() {
         }}
         saving={collections.saving}
       />
-      <RequestFailure status={collections.status} />
-      {collections.loading ? (
+      <RequestFailure
+        onRetry={collections.retryable ? collections.reload : undefined}
+        status={collections.status}
+      />
+      {collections.loading && !collections.loaded ? (
         <Stack role="status" sx={{ alignItems: "center", mt: 4 }}>
           <CircularProgress aria-label="Loading collections" />
         </Stack>
-      ) : (
+      ) : collections.loaded ? (
         <List aria-label="Your collections" sx={{ mt: 2 }}>
           {collections.items.map((collection) => (
             <Fragment key={collection.id}>
@@ -57,26 +60,29 @@ export function CollectionsListPage() {
           ))}
           {collections.items.length === 0 ? <ListItem>Your collections will appear here.</ListItem> : null}
         </List>
-      )}
+      ) : null}
       {collections.hasMore ? (
         <LoadMoreButton disabled={collections.loadingMore} onClick={() => void collections.loadMore()} />
       ) : null}
       <Typography component="h2" sx={{ mt: 4 }} variant="h5">
         Shared by others
       </Typography>
-      <RequestFailure status={sharedCollections.status} />
-      {sharedCollections.loading ? (
+      <RequestFailure
+        onRetry={sharedCollections.retryable ? sharedCollections.reload : undefined}
+        status={sharedCollections.status}
+      />
+      {sharedCollections.loading && !sharedCollections.loaded ? (
         <Stack role="status" sx={{ alignItems: "center", mt: 2 }}>
           <CircularProgress aria-label="Loading shared collections" />
         </Stack>
-      ) : (
+      ) : sharedCollections.loaded ? (
         <List aria-label="Collections shared by others" sx={{ mt: 2 }}>
           {sharedCollections.items.map((collection) => (
             <CollectionCard collection={collection} key={collection.id} onLeave={setLeaving} />
           ))}
           {sharedCollections.items.length === 0 ? <ListItem>No shared collections.</ListItem> : null}
         </List>
-      )}
+      ) : null}
       {sharedCollections.hasMore ? (
         <LoadMoreButton
           disabled={sharedCollections.loadingMore}

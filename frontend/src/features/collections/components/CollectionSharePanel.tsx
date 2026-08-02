@@ -31,12 +31,12 @@ export function CollectionSharePanel({ collectionId }: { collectionId: string })
           {shares.saving ? "Sharing…" : "Share collection"}
         </Button>
       </Stack>
-      <RequestFailure status={shares.status} />
-      {shares.loading ? (
+      <RequestFailure onRetry={shares.retryable ? shares.reload : undefined} status={shares.status} />
+      {shares.loading && !shares.loaded ? (
         <Stack role="status" sx={{ alignItems: "center" }}>
           <CircularProgress aria-label="Loading collection shares" />
         </Stack>
-      ) : (
+      ) : shares.loaded ? (
         <List aria-label="Current grantees">
           {shares.items.map((share) => (
             <ListItem
@@ -57,7 +57,7 @@ export function CollectionSharePanel({ collectionId }: { collectionId: string })
           ))}
           {shares.items.length === 0 ? <ListItem>No one has access yet.</ListItem> : null}
         </List>
-      )}
+      ) : null}
       {shares.hasMore ? (
         <LoadMoreButton disabled={shares.loadingMore} onClick={() => void shares.loadMore()} />
       ) : null}

@@ -55,6 +55,30 @@ describe("authentication error HTTP contract", () => {
     }
   });
 
+  it("clears a shared provider failure so the next request can succeed", async () => {
+    harness = await startAuthHarness(keys.publicJwk);
+    harness.state.userinfo = { delayMs: 30, status: 500 };
+    const token = await signTestToken(keys.privateKey, harness.issuer);
+
+    const failures = await Promise.all(
+      Array.from({ length: 3 }, () => request(harness!.baseUrl, "/me", `Bearer ${token}`)),
+    );
+    for (const response of failures) await expectServiceUnavailable(response);
+    expect(harness.state.userinfoCalls).toBe(1);
+
+    harness.state.userinfo = {
+      body: {
+        sub: "auth0|owner",
+        email: "Owner@Example.com",
+        email_verified: true,
+      },
+    };
+    const next = await request(harness.baseUrl, "/me", `Bearer ${token}`);
+
+    expect(next.status).toBe(200);
+    expect(harness.state.userinfoCalls).toBe(2);
+  });
+
   it.each(["discovery", "jwks", "userinfo"] as const)(
     "maps a %s timeout to 503",
     async (stage) => {
@@ -105,22 +129,35 @@ describe("authentication error HTTP contract", () => {
     );
   });
 
-  it("returns a sanitized 500 when persistence fails", async () => {
+  it("shares and clears a sanitized persistence failure", async () => {
     harness = await startAuthHarness(keys.publicJwk);
+    harness.state.userinfo.delayMs = 30;
     harness.upsert.mockRejectedValueOnce(
       new Error("database secret and access token must not leak"),
     );
     const token = await signTestToken(keys.privateKey, harness.issuer);
-    const response = await request(harness.baseUrl, "/me", `Bearer ${token}`);
+    const responses = await Promise.all(
+      Array.from({ length: 3 }, () => request(harness!.baseUrl, "/me", `Bearer ${token}`)),
+    );
 
-    expect(response.status).toBe(500);
-    const body = await response.text();
-    expect(JSON.parse(body)).toEqual({
-      statusCode: 500,
-      message: "Internal server error",
-    });
-    expect(body).not.toContain("secret");
-    expect(body).not.toContain(token);
+    for (const response of responses) {
+      expect(response.status).toBe(500);
+      const body = await response.text();
+      expect(JSON.parse(body)).toEqual({
+        statusCode: 500,
+        message: "Internal server error",
+      });
+      expect(body).not.toContain("secret");
+      expect(body).not.toContain(token);
+    }
+    expect(harness.state.userinfoCalls).toBe(1);
+    expect(harness.upsert).toHaveBeenCalledTimes(1);
+
+    harness.state.userinfo.delayMs = undefined;
+    const next = await request(harness.baseUrl, "/me", `Bearer ${token}`);
+    expect(next.status).toBe(200);
+    expect(harness.state.userinfoCalls).toBe(2);
+    expect(harness.upsert).toHaveBeenCalledTimes(2);
   });
 
   it("returns a sanitized 400 for malformed JSON before authentication", async () => {

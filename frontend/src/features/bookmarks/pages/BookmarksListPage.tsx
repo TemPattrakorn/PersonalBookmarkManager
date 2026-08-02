@@ -55,13 +55,20 @@ export function BookmarksListPage() {
         value={selectedFilter}
       />
       <RequestFailure
+        onRetry={
+          bookmarks.collectionsStatus !== undefined ||
+          bookmarks.activeCollectionStatus !== undefined ||
+          bookmarks.retryable
+            ? bookmarks.retry
+            : undefined
+        }
         status={bookmarks.collectionsStatus ?? bookmarks.activeCollectionStatus ?? bookmarks.status}
       />
-      {bookmarks.loading ? (
+      {bookmarks.loading && !bookmarks.loaded ? (
         <Stack role="status" sx={{ alignItems: "center", mt: 4 }}>
           <CircularProgress aria-label="Loading bookmarks" />
         </Stack>
-      ) : (
+      ) : bookmarks.loaded ? (
         <List aria-label="Your bookmarks" sx={{ mt: 2 }}>
           {bookmarks.items.map((bookmark) => (
             <BookmarkCard
@@ -73,7 +80,7 @@ export function BookmarksListPage() {
           ))}
           {bookmarks.items.length === 0 ? <ListItem>Your bookmarks will appear here.</ListItem> : null}
         </List>
-      )}
+      ) : null}
       {bookmarks.hasMore ? (
         <LoadMoreButton disabled={bookmarks.loadingMore} onClick={() => void bookmarks.loadMore()} />
       ) : null}

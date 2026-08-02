@@ -16,6 +16,12 @@ provider-specific rewriting. Email is only a share-recipient lookup key:
 authorization is stored against the stable local person ID, and accounts are
 never linked by email.
 
+Concurrent requests with the same bearer token may await one active identity
+synchronization and local-person upsert. The coordination key is a SHA-256
+digest of the authorization header and is discarded after success or failure.
+No completed result is cached: the next sequential request repeats token
+verification, `/userinfo`, and the upsert.
+
 A person whose Auth0 email is unverified may use private application features.
 Verification state affects only eligibility as a share recipient. The API does
 not separately enforce the token's `scope` claim; the SPA requests `openid

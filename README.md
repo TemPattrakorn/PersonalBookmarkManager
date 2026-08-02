@@ -63,6 +63,12 @@ with Authorization Code flow and PKCE. The documented collection, bookmark,
 and share routes are available. No Auth0 client secret or test password is
 committed or required in frontend configuration.
 
+If an initial collection, bookmark, or share-list request fails, the UI shows
+an explicit Retry action instead of an empty-list message. A failed refresh
+keeps data already loaded from the same source visible; changing a collection
+filter clears the previous filter's data while the new request is pending or
+failed. Bookmark Retry also reloads its collection metadata.
+
 ## Verify
 
 Run the complete repository gate:

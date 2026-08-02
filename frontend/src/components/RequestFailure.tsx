@@ -1,4 +1,4 @@
-import { Alert } from "@mui/material";
+import { Alert, Button } from "@mui/material";
 
 function failureMessage(status: number | undefined): string | undefined {
   if (status === undefined) return undefined;
@@ -8,10 +8,20 @@ function failureMessage(status: number | undefined): string | undefined {
   return "We couldn’t complete that request. Please try again.";
 }
 
-export function RequestFailure({ status }: { status: number | undefined }) {
+export function RequestFailure({
+  onRetry,
+  status,
+}: {
+  onRetry?: () => void;
+  status: number | undefined;
+}) {
   const message = failureMessage(status);
   return message ? (
-    <Alert severity={status === 400 ? "warning" : "error"} sx={{ mt: 2 }}>
+    <Alert
+      action={onRetry ? <Button color="inherit" onClick={onRetry}>Retry</Button> : undefined}
+      severity={status === 400 ? "warning" : "error"}
+      sx={{ mt: 2 }}
+    >
       {message}
     </Alert>
   ) : null;
