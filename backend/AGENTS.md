@@ -11,7 +11,9 @@ rules only.
 - Authenticate every route by validating Auth0 access tokens against:
   - discovery: `https://dev-yg.us.auth0.com/.well-known/openid-configuration`;
   - audience: `https://bbl-candidate-test-api`;
-  - required scopes requested by the client: `openid profile email`.
+  - a client request for `openid profile email`; the API does not separately
+    enforce the token `scope` claim, but rejects tokens without usable
+    `/userinfo` identity.
 - The discovery URL and audience are public configuration. Do not add or
   require a client secret for the public SPA.
 - Implement `/me`, `/collections`, `/bookmarks`,

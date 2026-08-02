@@ -123,6 +123,23 @@ describe("authentication error HTTP contract", () => {
     expect(body).not.toContain(token);
   });
 
+  it("returns a sanitized 400 for malformed JSON before authentication", async () => {
+    harness = await startAuthHarness(keys.publicJwk);
+    const response = await fetch(`${harness.baseUrl}/me`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{",
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      statusCode: 400,
+      message: "Validation failed",
+    });
+    expect(harness.state.userinfoCalls).toBe(0);
+    expect(harness.upsert).not.toHaveBeenCalled();
+  });
+
   it("normalizes an unknown route to the generic 404", async () => {
     harness = await startAuthHarness(keys.publicJwk);
     const response = await request(harness.baseUrl, "/unknown");

@@ -41,6 +41,12 @@ export async function signTestToken(
     .sign(key);
 }
 
+export async function signUntrustedToken(issuer: string): Promise<string> {
+  const { generateKeyPair } = await getJose();
+  const pair = await generateKeyPair("RS256");
+  return signTestToken(pair.privateKey, issuer);
+}
+
 export async function signWrongAlgorithmToken(
   key: CryptoKey,
   issuer: string,

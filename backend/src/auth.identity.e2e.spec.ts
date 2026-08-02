@@ -10,6 +10,7 @@ import {
 import {
   createAuthTestKeys,
   signTestToken,
+  signUntrustedToken,
   signWrongAlgorithmToken,
   type AuthTestKeys,
 } from "./auth.test-tokens";
@@ -123,6 +124,17 @@ describe("authenticated identity HTTP contract", () => {
     await expectAuthenticationRequired(
       await request(harness.baseUrl, "/me", "Bearer malformed"),
     );
+  });
+
+  it("rejects a valid-looking token signed by an untrusted key before profile lookup", async () => {
+    harness = await startAuthHarness(keys.publicJwk);
+    const token = await signUntrustedToken(harness.issuer);
+
+    await expectAuthenticationRequired(
+      await request(harness.baseUrl, "/me", `Bearer ${token}`),
+    );
+    expect(harness.state.userinfoCalls).toBe(0);
+    expect(harness.upsert).not.toHaveBeenCalled();
   });
 
   it("rejects mismatched or missing /userinfo identity without writing", async () => {

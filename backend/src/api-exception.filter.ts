@@ -2,6 +2,7 @@ import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
+  HttpException,
   NotFoundException,
 } from "@nestjs/common";
 import type { Response } from "express";
@@ -32,10 +33,26 @@ export class ApiExceptionFilter implements ExceptionFilter {
       return;
     }
 
+    if (statusOf(exception) === 400) {
+      response.status(400).json({
+        statusCode: 400,
+        message: "Validation failed",
+      });
+      return;
+    }
+
     if (exception instanceof NotFoundException) {
       response.status(404).json({
         statusCode: 404,
         message: "Resource not found",
+      });
+      return;
+    }
+
+    if (statusOf(exception) === 415) {
+      response.status(415).json({
+        statusCode: 415,
+        message: "Unsupported media type",
       });
       return;
     }
@@ -45,4 +62,13 @@ export class ApiExceptionFilter implements ExceptionFilter {
       message: "Internal server error",
     });
   }
+}
+
+function statusOf(exception: unknown): number | undefined {
+  if (exception instanceof HttpException) {
+    return exception.getStatus();
+  }
+  return typeof exception === "object" && exception !== null
+    ? (exception as { status?: unknown }).status as number | undefined
+    : undefined;
 }
