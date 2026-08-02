@@ -156,6 +156,13 @@ describe("collection and bookmark HTTP contract", () => {
   it("enforces owner-only writes and non-disclosing shared reads", async () => {
     const collection = await createCollection("Private");
     const bookmark = await createBookmark(collection.id);
+    const ownerRead = await requestAs(harness!, owner, `/collections/${collection.id}`);
+    expect(ownerRead.status).toBe(200);
+    await expect(ownerRead.json()).resolves.toMatchObject({
+      id: collection.id,
+      name: "Private",
+      access: "owner",
+    });
     const grant = await requestAs(harness!, owner, `/collections/${collection.id}/shares`, {
       method: "POST",
       body: { email: grantee.email },
@@ -199,12 +206,26 @@ describe("collection and bookmark HTTP contract", () => {
         method: "DELETE",
       }),
       await requestAs(harness!, outsider, `/collections/${collection.id}`),
+      await requestAs(harness!, outsider, `/collections/${collection.id}`, {
+        method: "PATCH",
+        body: { name: "No" },
+      }),
+      await requestAs(harness!, outsider, `/collections/${collection.id}`, {
+        method: "DELETE",
+      }),
       await requestAs(harness!, outsider, `/bookmarks?collectionId=${collection.id}`),
       await requestAs(harness!, outsider, `/collections/${collection.id}/bookmarks`),
       await requestAs(harness!, outsider, `/bookmarks/${bookmark.id}`),
     ]) {
       await expectNotFound(response);
     }
+    await expect(
+      (await requestAs(harness!, owner, `/collections/${collection.id}`)).json(),
+    ).resolves.toMatchObject({ name: "Private", access: "owner" });
+    await expect((await requestAs(harness!, owner, `/bookmarks/${bookmark.id}`)).json()).resolves.toMatchObject({
+      collectionId: collection.id,
+      access: "owner",
+    });
     await expect((await requestAs(harness!, outsider, "/collections")).json()).resolves.toEqual([]);
     await expect(
       (await requestAs(harness!, outsider, "/collections?scope=shared")).json(),
