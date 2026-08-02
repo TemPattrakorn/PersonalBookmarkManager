@@ -21,7 +21,7 @@ export class Auth0Client {
     const token = this.readBearerToken(authorization);
     await this.precheckToken(token);
     const metadata = await this.transport.getMetadata();
-    const subject = await this.verifyToken(token, metadata);
+    const { expiresAt, subject } = await this.verifyToken(token, metadata);
     const profile = await this.transport.getUserProfile(metadata.userinfoUrl, token);
 
     if (profile.subject !== subject) {
@@ -33,7 +33,7 @@ export class Auth0Client {
       throw new AuthenticationRequiredError();
     }
 
-    return { subject, email, emailVerified: profile.emailVerified };
+    return { subject, email, emailVerified: profile.emailVerified, expiresAt };
   }
 
   private readBearerToken(authorization: string | undefined): string {
@@ -68,7 +68,10 @@ export class Auth0Client {
     }
   }
 
-  private async verifyToken(token: string, metadata: AuthMetadata): Promise<string> {
+  private async verifyToken(
+    token: string,
+    metadata: AuthMetadata,
+  ): Promise<{ expiresAt: number; subject: string }> {
     const jose = await getJose();
     try {
       const { payload } = await jose.jwtVerify(token, metadata.getKey, {
@@ -76,10 +79,14 @@ export class Auth0Client {
         audience: this.config.audience,
         issuer: this.config.issuer,
       });
-      if (typeof payload.sub !== "string" || payload.sub.length === 0) {
+      if (
+        typeof payload.sub !== "string" ||
+        payload.sub.length === 0 ||
+        typeof payload.exp !== "number"
+      ) {
         throw new AuthenticationRequiredError();
       }
-      return payload.sub;
+      return { expiresAt: payload.exp * 1_000, subject: payload.sub };
     } catch (error) {
       if (error instanceof Auth0UnavailableError) {
         throw error;

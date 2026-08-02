@@ -30,7 +30,7 @@ describe("authenticated identity HTTP contract", () => {
     }
   });
 
-  it("returns /me and synchronizes verified and unverified profiles on every request", async () => {
+  it("reuses a successful synchronization for the same unexpired token", async () => {
     harness = await startAuthHarness(keys.publicJwk);
     const token = await signTestToken(keys.privateKey, harness.issuer);
 
@@ -45,9 +45,32 @@ describe("authenticated identity HTTP contract", () => {
     };
     const second = await request(harness.baseUrl, "/me", `Bearer ${token}`);
     expect(second.status).toBe(200);
-    await expect(second.json()).resolves.toEqual({ email: "updated@example.com" });
-    expect(harness.state.userinfoCalls).toBe(2);
+    await expect(second.json()).resolves.toEqual({ email: "Owner@Example.com" });
+    expect(harness.state.userinfoCalls).toBe(1);
     expect(harness.state.userinfoAuthorization).toBe(`Bearer ${token}`);
+    expect(harness.upsert).toHaveBeenCalledTimes(1);
+    expect(harness.upsert).toHaveBeenCalledWith({
+      where: { auth0Subject: "auth0|owner" },
+      update: {
+        email: "Owner@Example.com",
+        normalizedEmail: "owner@example.com",
+        emailVerified: true,
+      },
+      create: {
+        auth0Subject: "auth0|owner",
+        email: "Owner@Example.com",
+        normalizedEmail: "owner@example.com",
+        emailVerified: true,
+      },
+    });
+
+    const refreshedToken = await signTestToken(keys.privateKey, harness.issuer, {
+      expirationTime: "10m",
+    });
+    const refreshed = await request(harness.baseUrl, "/me", `Bearer ${refreshedToken}`);
+    expect(refreshed.status).toBe(200);
+    await expect(refreshed.json()).resolves.toEqual({ email: "updated@example.com" });
+    expect(harness.state.userinfoCalls).toBe(2);
     expect(harness.upsert).toHaveBeenLastCalledWith({
       where: { auth0Subject: "auth0|owner" },
       update: {
@@ -64,7 +87,7 @@ describe("authenticated identity HTTP contract", () => {
     });
   });
 
-  it("coalesces concurrent requests with the same token, then synchronizes again", async () => {
+  it("coalesces concurrent requests and keeps their successful result", async () => {
     harness = await startAuthHarness(keys.publicJwk);
     harness.state.userinfo.delayMs = 30;
     const token = await signTestToken(keys.privateKey, harness.issuer);
@@ -87,9 +110,32 @@ describe("authenticated identity HTTP contract", () => {
     const next = await request(harness.baseUrl, "/me", `Bearer ${token}`);
 
     expect(next.status).toBe(200);
-    await expect(next.json()).resolves.toEqual({ email: "updated@example.com" });
-    expect(harness.state.userinfoCalls).toBe(2);
-    expect(harness.upsert).toHaveBeenCalledTimes(2);
+    await expect(next.json()).resolves.toEqual({ email: "Owner@Example.com" });
+    expect(harness.state.userinfoCalls).toBe(1);
+    expect(harness.upsert).toHaveBeenCalledTimes(1);
+  });
+
+  it("never serves a cached person after the verified token expires", async () => {
+    harness = await startAuthHarness(keys.publicJwk);
+    const expiresAt = Math.floor(Date.now() / 1_000) + 60;
+    const token = await signTestToken(keys.privateKey, harness.issuer, {
+      expirationTime: expiresAt,
+    });
+
+    const first = await request(harness.baseUrl, "/me", `Bearer ${token}`);
+    expect(first.status).toBe(200);
+
+    const now = jest.spyOn(Date, "now").mockReturnValue((expiresAt + 1) * 1_000);
+    try {
+      await expectAuthenticationRequired(
+        await request(harness.baseUrl, "/me", `Bearer ${token}`),
+      );
+    } finally {
+      now.mockRestore();
+    }
+
+    expect(harness.state.userinfoCalls).toBe(1);
+    expect(harness.upsert).toHaveBeenCalledTimes(1);
   });
 
   it("never shares authentication work between different tokens", async () => {

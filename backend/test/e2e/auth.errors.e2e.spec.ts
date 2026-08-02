@@ -77,6 +77,10 @@ describe("authentication error HTTP contract", () => {
 
     expect(next.status).toBe(200);
     expect(harness.state.userinfoCalls).toBe(2);
+
+    const cached = await request(harness.baseUrl, "/me", `Bearer ${token}`);
+    expect(cached.status).toBe(200);
+    expect(harness.state.userinfoCalls).toBe(2);
   });
 
   it.each(["discovery", "jwks", "userinfo"] as const)(

@@ -18,6 +18,7 @@ export const authConfig: AuthConfig = Object.freeze({
 export type Auth0Identity = {
   email: string;
   emailVerified: boolean;
+  expiresAt: number;
   subject: string;
 };
 
